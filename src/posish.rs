@@ -9,6 +9,7 @@ use std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     net::TcpStream,
 };
+use unsafe_io::AsRawReadWriteFd;
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
@@ -118,6 +119,18 @@ impl FromRawFd for SocketpairStream {
     #[inline]
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
         Self(TcpStream::from_raw_fd(raw_fd))
+    }
+}
+
+impl AsRawReadWriteFd for SocketpairStream {
+    #[inline]
+    fn as_raw_read_fd(&self) -> RawFd {
+        self.as_raw_fd()
+    }
+
+    #[inline]
+    fn as_raw_write_fd(&self) -> RawFd {
+        self.as_raw_fd()
     }
 }
 

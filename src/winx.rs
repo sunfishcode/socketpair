@@ -12,6 +12,7 @@ use std::{
     path::Path,
     ptr,
 };
+use unsafe_io::{AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket};
 use uuid::Uuid;
 use winapi::{
     shared::winerror::ERROR_ACCESS_DENIED,
@@ -173,6 +174,25 @@ impl FromRawHandle for SocketpairStream {
     #[inline]
     unsafe fn from_raw_handle(raw_handle: RawHandle) -> Self {
         Self(File::from_raw_handle(raw_handle))
+    }
+}
+
+impl AsRawHandleOrSocket for SocketpairStream {
+    #[inline]
+    fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.0.as_raw_handle_or_socket()
+    }
+}
+
+impl AsRawReadWriteHandleOrSocket for SocketpairStream {
+    #[inline]
+    fn as_raw_read_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.as_raw_handle_or_socket()
+    }
+
+    #[inline]
+    fn as_raw_write_handle_or_socket(&self) -> RawHandleOrSocket {
+        self.as_raw_handle_or_socket()
     }
 }
 
