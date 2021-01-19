@@ -29,6 +29,11 @@ impl SocketpairStream {
     pub fn peek(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.0.peek(buf)
     }
+
+    /// Return the number of bytes which are ready to be read immediately.
+    pub fn num_ready_bytes(&self) -> io::Result<u64> {
+        posish::io::fionread(self)
+    }
 }
 
 /// Create a socketpair and return stream handles connected to each end.

@@ -75,6 +75,8 @@ fn peek() -> anyhow::Result<()> {
         started = cvar.wait(started).unwrap();
     }
 
+    assert_eq!(b.num_ready_bytes()?, 12);
+
     let mut buf = vec![0u8; 11];
     assert_eq!(b.peek(&mut buf)?, 11);
     assert_eq!(str::from_utf8(&buf).unwrap(), "hello world");

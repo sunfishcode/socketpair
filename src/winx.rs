@@ -64,6 +64,25 @@ impl SocketpairStream {
         }
         Ok(unsafe { bytes_read.assume_init() } as usize)
     }
+
+    /// Return the number of bytes which are ready to be read immediately.
+    pub fn num_ready_bytes(&self) -> io::Result<u64> {
+        let mut bytes_avail = MaybeUninit::<u32>::uninit();
+        let res = unsafe {
+            PeekNamedPipe(
+                self.0.as_raw_handle(),
+                ptr::null_mut(),
+                0,
+                ptr::null_mut(),
+                bytes_avail.as_mut_ptr(),
+                ptr::null_mut(),
+            )
+        };
+        if res == 0 {
+            return Err(io::Error::last_os_error());
+        }
+        Ok(u64::from(unsafe { bytes_avail.assume_init() }))
+    }
 }
 
 /// Create a socketpair and return stream handles connected to each end.
