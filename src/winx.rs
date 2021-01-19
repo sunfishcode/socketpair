@@ -1,10 +1,12 @@
 //! `SocketpairStream` and `socketpair_stream` for Windows.
 
 use std::{
+    cmp::min,
     convert::TryInto,
     fmt::{self, Arguments, Debug},
     fs::File,
     io::{self, IoSlice, IoSliceMut, Read, Write},
+    mem::MaybeUninit,
     os::windows::{
         ffi::OsStrExt,
         io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
@@ -15,11 +17,11 @@ use std::{
 use unsafe_io::{AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket};
 use uuid::Uuid;
 use winapi::{
-    shared::winerror::ERROR_ACCESS_DENIED,
+    shared::{minwindef::LPVOID, winerror::ERROR_ACCESS_DENIED},
     um::{
         fileapi::{CreateFileW, OPEN_EXISTING},
         handleapi::INVALID_HANDLE_VALUE,
-        namedpipeapi::CreateNamedPipeW,
+        namedpipeapi::{CreateNamedPipeW, PeekNamedPipe},
         winbase::{
             FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
             PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
@@ -33,6 +35,36 @@ use winapi::{
 ///
 /// [`TcpStream`]: std::net::TcpStream
 pub struct SocketpairStream(File);
+
+impl SocketpairStream {
+    /// Creates a new independently owned handle to the underlying socket.
+    #[inline]
+    pub fn try_clone(&self) -> io::Result<Self> {
+        self.0.try_clone().map(Self)
+    }
+
+    /// Receives data on the socket from the remote address to which it is
+    /// connected, without removing that data from the queue. On success,
+    /// returns the number of bytes peeked.
+    pub fn peek(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        let mut bytes_read = MaybeUninit::<u32>::uninit();
+        let len = min(buf.len(), u32::MAX as usize) as u32;
+        let res = unsafe {
+            PeekNamedPipe(
+                self.0.as_raw_handle(),
+                buf.as_mut_ptr() as LPVOID,
+                len,
+                bytes_read.as_mut_ptr(),
+                ptr::null_mut(),
+                ptr::null_mut(),
+            )
+        };
+        if res == 0 {
+            return Err(io::Error::last_os_error());
+        }
+        Ok(unsafe { bytes_read.assume_init() } as usize)
+    }
+}
 
 /// Create a socketpair and return stream handles connected to each end.
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {

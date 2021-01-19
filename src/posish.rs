@@ -15,6 +15,22 @@ use unsafe_io::AsRawReadWriteFd;
 /// [`TcpStream`] except that it does not have a name or address.
 pub struct SocketpairStream(TcpStream);
 
+impl SocketpairStream {
+    /// Creates a new independently owned handle to the underlying socket.
+    #[inline]
+    pub fn try_clone(&self) -> io::Result<Self> {
+        self.0.try_clone().map(Self)
+    }
+
+    /// Receives data on the socket from the remote address to which it is
+    /// connected, without removing that data from the queue. On success,
+    /// returns the number of bytes peeked.
+    #[inline]
+    pub fn peek(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        self.0.peek(buf)
+    }
+}
+
 /// Create a socketpair and return stream handles connected to each end.
 #[inline]
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
