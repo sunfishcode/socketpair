@@ -16,6 +16,7 @@ use unsafe_io::AsRawReadWriteFd;
 pub struct SocketpairStream(TcpStream);
 
 /// Create a socketpair and return stream handles connected to each end.
+#[inline]
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
     posish::io::socketpair_stream(libc::AF_UNIX, 0).map(|(a, b)| {
         let a = a.into_raw_fd();
