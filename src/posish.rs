@@ -31,6 +31,7 @@ impl SocketpairStream {
     }
 
     /// Return the number of bytes which are ready to be read immediately.
+    #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
         posish::io::fionread(self)
     }
