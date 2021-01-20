@@ -31,9 +31,9 @@
 #[cfg(not(windows))]
 mod posish;
 #[cfg(windows)]
-mod winx;
+mod windows;
 
 #[cfg(not(windows))]
 pub use crate::posish::{socketpair_stream, SocketpairStream};
 #[cfg(windows)]
-pub use crate::winx::{socketpair_stream, SocketpairStream};
+pub use crate::windows::{socketpair_stream, SocketpairStream};
