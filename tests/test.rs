@@ -13,7 +13,7 @@ fn test() -> anyhow::Result<()> {
     let thread_a = thread::spawn(move || -> anyhow::Result<()> {
         writeln!(a, "hello world")?;
 
-        let mut buf = [0u8; 4096];
+        let mut buf = [0_u8; 4096];
         let n = a.read(&mut buf)?;
         assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "greetings\n");
 
@@ -22,7 +22,7 @@ fn test() -> anyhow::Result<()> {
     });
 
     let thread_b = thread::spawn(move || -> anyhow::Result<()> {
-        let mut buf = [0u8; 4096];
+        let mut buf = [0_u8; 4096];
         let n = b.read(&mut buf)?;
         assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "hello world\n");
 
@@ -77,7 +77,7 @@ fn peek() -> anyhow::Result<()> {
 
     assert_eq!(b.num_ready_bytes()?, 12);
 
-    let mut buf = vec![0u8; 11];
+    let mut buf = vec![0_u8; 11];
     assert_eq!(b.peek(&mut buf)?, 11);
     assert_eq!(str::from_utf8(&buf).unwrap(), "hello world");
 
@@ -96,7 +96,7 @@ fn try_clone() -> anyhow::Result<()> {
 
     let mut c = b.try_clone()?;
 
-    let mut buf = vec![0u8; 6];
+    let mut buf = vec![0_u8; 6];
     b.read_exact(&mut buf)?;
     assert_eq!(str::from_utf8(&buf).unwrap(), "hello ");
     c.read_exact(&mut buf)?;
