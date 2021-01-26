@@ -65,6 +65,7 @@ fn peek() -> anyhow::Result<()> {
         let n = writeln!(a, "hello world")?;
 
         *started = true;
+        drop(started);
         cvar.notify_one();
         Ok(n)
     });
