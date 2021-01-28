@@ -6,7 +6,7 @@
   </p>
 
   <p>
-    <a href="https://github.com/sunfishcode/socketpair<img src="https://github.com/sunfishcode/socketpair/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
+    <a href="https://github.com/sunfishcode/socketpair/actions?query=workflow%3ACI"><img src="https://github.com/sunfishcode/socketpair/workflows/CI/badge.svg" alt="Github Actions CI Status" /></a>
     <a href="https://crates.io/crates/socketpair"><img src="https://img.shields.io/crates/v/socketpair.svg" alt="crates.io page" /></a>
     <a href="https://docs.rs/socketpair"><img src="https://docs.rs/socketpair/badge.svg" alt="docs.rs docs" /></a>
   </p>
