@@ -34,6 +34,7 @@ use winapi::{
 /// [`TcpStream`] except that it does not have a name or address.
 ///
 /// [`TcpStream`]: std::net::TcpStream
+#[repr(transparent)]
 pub struct SocketpairStream(File);
 
 impl SocketpairStream {

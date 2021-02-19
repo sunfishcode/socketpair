@@ -13,6 +13,7 @@ use unsafe_io::AsRawReadWriteFd;
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
+#[repr(transparent)]
 pub struct SocketpairStream(TcpStream);
 
 impl SocketpairStream {
