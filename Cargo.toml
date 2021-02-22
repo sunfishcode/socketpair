@@ -11,10 +11,10 @@ repository = "https://github.com/sunfishcode/socketpair"
 readme = "README.md"
 
 [dependencies]
-unsafe-io = "0.3.0"
+unsafe-io = "0.5.0"
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.5.6"
+posish = "0.5.11"
 libc = "0.2.82"
 
 [target.'cfg(windows)'.dependencies]

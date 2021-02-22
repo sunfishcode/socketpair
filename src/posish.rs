@@ -1,15 +1,14 @@
 //! `SocketpairStream` and `socketpair_stream` for Posix-ish platforms.
 
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-#[cfg(target_os = "wasi")]
-use std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use std::{
     fmt::{self, Arguments, Debug},
     io::{self, IoSlice, IoSliceMut, Read, Write},
     net::TcpStream,
 };
-use unsafe_io::AsRawReadWriteFd;
+use unsafe_io::{
+    os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd},
+    OwnsRaw,
+};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
@@ -157,6 +156,9 @@ impl AsRawReadWriteFd for SocketpairStream {
         self.as_raw_fd()
     }
 }
+
+/// Safety: `SocketpairStream` wraps a `TcpStream` which owns its handle.
+unsafe impl OwnsRaw for SocketpairStream {}
 
 impl Debug for SocketpairStream {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

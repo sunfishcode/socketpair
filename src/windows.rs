@@ -14,7 +14,10 @@ use std::{
     path::Path,
     ptr,
 };
-use unsafe_io::{AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket};
+use unsafe_io::{
+    os::windows::{AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket},
+    OwnsRaw,
+};
 use uuid::Uuid;
 use winapi::{
     shared::{minwindef::LPVOID, winerror::ERROR_ACCESS_DENIED},
@@ -247,6 +250,9 @@ impl AsRawReadWriteHandleOrSocket for SocketpairStream {
         self.as_raw_handle_or_socket()
     }
 }
+
+/// Safety: `SocketpairStream` wraps a `TcpStream` which owns its handle.
+unsafe impl OwnsRaw for SocketpairStream {}
 
 impl Debug for SocketpairStream {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
