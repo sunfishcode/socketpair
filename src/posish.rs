@@ -161,6 +161,7 @@ impl AsRawReadWriteFd for SocketpairStream {
 unsafe impl OwnsRaw for SocketpairStream {}
 
 impl Debug for SocketpairStream {
+    #[allow(clippy::missing_inline_in_public_items)]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Just print the fd numbers; don't try to print the path or any
         // information about it, because this information is otherwise
