@@ -15,7 +15,9 @@ use std::{
     ptr,
 };
 use unsafe_io::{
-    os::windows::{AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket},
+    os::windows::{
+        AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket,
+    },
     OwnsRaw,
 };
 use uuid::Uuid;
@@ -236,6 +238,13 @@ impl AsRawHandleOrSocket for SocketpairStream {
     #[inline]
     fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
         self.0.as_raw_handle_or_socket()
+    }
+}
+
+impl IntoRawHandleOrSocket for SocketpairStream {
+    #[inline]
+    fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
+        self.0.into_raw_handle_or_socket()
     }
 }
 
