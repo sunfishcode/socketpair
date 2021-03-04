@@ -26,14 +26,27 @@
 
 #![deny(missing_docs)]
 #![cfg_attr(can_vector, feature(can_vector))]
+#![cfg_attr(all(unix, unix_socket_peek), feature(unix_socket_peek))]
 #![cfg_attr(write_all_vectored, feature(write_all_vectored))]
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, unix)))]
 mod posish;
+#[cfg(unix)]
+mod unix;
+#[cfg(all(unix, feature = "async-std"))]
+mod unix_async_std;
 #[cfg(windows)]
 mod windows;
+#[cfg(all(windows, feature = "async-std"))]
+mod windows_async_std;
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, unix)))]
 pub use crate::posish::{socketpair_stream, SocketpairStream};
+#[cfg(unix)]
+pub use crate::unix::{socketpair_stream, SocketpairStream};
+#[cfg(all(unix, feature = "async-std"))]
+pub use crate::unix_async_std::{async_socketpair_stream, AsyncSocketpairStream};
 #[cfg(windows)]
 pub use crate::windows::{socketpair_stream, SocketpairStream};
+#[cfg(all(windows, feature = "async-std"))]
+pub use crate::windows_async_std::{async_socketpair_stream, AsyncSocketpairStream};

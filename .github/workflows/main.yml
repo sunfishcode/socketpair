@@ -40,4 +40,4 @@ jobs:
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - run: cargo test --workspace
+    - run: cargo test --workspace --all-features
