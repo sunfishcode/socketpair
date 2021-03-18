@@ -5,6 +5,7 @@ use async_std::{
     os::unix::net::UnixStream,
 };
 use std::{
+    fmt::{self, Debug},
     pin::Pin,
     task::{Context, Poll},
 };
@@ -130,9 +131,9 @@ impl AsRawReadWriteFd for AsyncSocketpairStream {
 /// Safety: `SocketpairStream` wraps a `UnixStream` which owns its handle.
 unsafe impl OwnsRaw for AsyncSocketpairStream {}
 
-impl std::fmt::Debug for AsyncSocketpairStream {
+impl Debug for AsyncSocketpairStream {
     #[allow(clippy::missing_inline_in_public_items)]
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Just print the fd numbers; don't try to print the path or any
         // information about it, because this information is otherwise
         // unavailable to safe Rust code.

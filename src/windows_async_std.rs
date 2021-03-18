@@ -8,6 +8,7 @@ use async_std::{
 };
 use std::{
     convert::TryInto,
+    fmt::{self, Debug},
     os::windows::ffi::OsStrExt,
     pin::Pin,
     ptr,
@@ -210,8 +211,8 @@ impl AsRawReadWriteHandleOrSocket for AsyncSocketpairStream {
 /// Safety: `AsyncSocketpairStream` wraps a `TcpStream` which owns its handle.
 unsafe impl OwnsRaw for AsyncSocketpairStream {}
 
-impl std::fmt::Debug for AsyncSocketpairStream {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Debug for AsyncSocketpairStream {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Just print the handles; don't try to print the path or any
         // information about it, because this information is otherwise
         // unavailable to safe Rust code.
