@@ -62,12 +62,12 @@ fn peek() -> anyhow::Result<()> {
         let (lock, cvar) = &*pair_clone;
         let mut started = lock.lock().unwrap();
 
-        let n = writeln!(a, "hello world")?;
+        writeln!(a, "hello world")?;
 
         *started = true;
         drop(started);
         cvar.notify_one();
-        Ok(n)
+        Ok(())
     });
 
     let (lock, cvar) = &*pair;
