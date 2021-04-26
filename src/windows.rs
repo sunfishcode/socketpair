@@ -1,6 +1,5 @@
 //! `SocketpairStream` and `socketpair_stream` for Windows.
 
-use io_close::Close;
 use std::{
     cmp::min,
     convert::TryInto,
@@ -211,13 +210,6 @@ impl Write for SocketpairStream {
     #[inline]
     fn write_fmt(&mut self, fmt: Arguments) -> io::Result<()> {
         self.0.write_fmt(fmt)
-    }
-}
-
-impl Close for SocketpairStream {
-    #[inline]
-    fn close(self) -> io::Result<()> {
-        Close::close(self.0)
     }
 }
 
