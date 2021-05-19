@@ -15,7 +15,8 @@ rustc_version = "0.3.3"
 
 [dependencies]
 async-std = { version = "1.9.0", optional = true }
-unsafe-io = "0.6.0"
+tokio = { version = "1.6.0", optional = true }
+unsafe-io = "0.6.8"
 
 [target.'cfg(not(windows))'.dependencies]
 posish = "0.6.0"
@@ -31,6 +32,7 @@ anyhow = "1.0.38"
 [features]
 default = []
 use_async_std = ["async-std", "unsafe-io/async-std"]
+use_tokio = ["tokio", "unsafe-io/tokio"]
 
 [badges]
 maintenance = { status = "actively-developed" }

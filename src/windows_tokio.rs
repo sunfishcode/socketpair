@@ -1,23 +1,24 @@
-//! `AsyncStdSocketpairStream` and `async_std_socketpair_stream` for Windows.
+//! `TokioSocketpairStream` and `tokio_socketpair_stream` for Windows.
 
-use async_std::{
-    fs::File,
-    io::{self, IoSlice, IoSliceMut, Read, Write},
-    os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    path::Path,
-};
 use std::{
     convert::TryInto,
     fmt::{self, Debug},
-    os::windows::ffi::OsStrExt,
+    io::IoSlice,
+    os::windows::{
+        ffi::OsStrExt,
+        io::{AsRawHandle, FromRawHandle, RawHandle},
+    },
+    path::Path,
     pin::Pin,
     ptr,
     task::{Context, Poll},
 };
+use tokio::{
+    fs::File,
+    io::{self, AsyncRead, AsyncWrite, ReadBuf},
+};
 use unsafe_io::{
-    os::windows::{
-        AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket,
-    },
+    os::windows::{AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket},
     OwnsRaw,
 };
 use uuid::Uuid;
@@ -38,14 +39,11 @@ use winapi::{
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
 ///
-/// [`TcpStream`]: async_std::net::TcpStream
-///
-/// TODO: Make this `Clone` once async-std releases with
-/// https://github.com/async-rs/async-std/pull/937
+/// [`TcpStream`]: tokio::net::TcpStream
 #[repr(transparent)]
-pub struct AsyncStdSocketpairStream(File);
+pub struct TokioSocketpairStream(File);
 
-impl AsyncStdSocketpairStream {
+impl TokioSocketpairStream {
     /// Receives data on the socket from the remote address to which it is
     /// connected, without removing that data from the queue. On success,
     /// returns the number of bytes peeked.
@@ -62,8 +60,8 @@ impl AsyncStdSocketpairStream {
 }
 
 /// Create a socketpair and return stream handles connected to each end.
-pub async fn async_std_socketpair_stream(
-) -> io::Result<(AsyncStdSocketpairStream, AsyncStdSocketpairStream)> {
+pub async fn tokio_socketpair_stream() -> io::Result<(TokioSocketpairStream, TokioSocketpairStream)>
+{
     let (first_raw_handle, path) = loop {
         let name = format!("\\\\.\\pipe\\{}", Uuid::new_v4());
         let mut path = Path::new(&name)
@@ -91,7 +89,7 @@ pub async fn async_std_socketpair_stream(
             return Err(err);
         }
     };
-    let first = unsafe { AsyncStdSocketpairStream::from_raw_handle(first_raw_handle) };
+    let first = unsafe { TokioSocketpairStream::from_raw_handle(first_raw_handle) };
 
     let second_raw_handle = unsafe {
         CreateFileW(
@@ -107,32 +105,23 @@ pub async fn async_std_socketpair_stream(
     if second_raw_handle == INVALID_HANDLE_VALUE {
         return Err(io::Error::last_os_error());
     }
-    let second = unsafe { AsyncStdSocketpairStream::from_raw_handle(second_raw_handle) };
+    let second = unsafe { TokioSocketpairStream::from_raw_handle(second_raw_handle) };
 
     Ok((first, second))
 }
 
-impl Read for AsyncStdSocketpairStream {
+impl AsyncRead for TokioSocketpairStream {
     #[inline]
     fn poll_read(
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
-        buf: &mut [u8],
-    ) -> Poll<io::Result<usize>> {
+        buf: &mut ReadBuf,
+    ) -> Poll<io::Result<()>> {
         Pin::new(&mut self.0).poll_read(cx, buf)
-    }
-
-    #[inline]
-    fn poll_read_vectored(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        bufs: &mut [IoSliceMut<'_>],
-    ) -> Poll<io::Result<usize>> {
-        Pin::new(&mut self.0).poll_read_vectored(cx, bufs)
     }
 }
 
-impl Write for AsyncStdSocketpairStream {
+impl AsyncWrite for TokioSocketpairStream {
     #[inline]
     fn poll_write(
         mut self: Pin<&mut Self>,
@@ -156,47 +145,33 @@ impl Write for AsyncStdSocketpairStream {
     }
 
     #[inline]
-    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        Pin::new(&mut self.0).poll_close(cx)
+    fn poll_shutdown(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.0).poll_shutdown(cx)
     }
 }
 
-impl AsRawHandle for AsyncStdSocketpairStream {
+impl AsRawHandle for TokioSocketpairStream {
     #[inline]
     fn as_raw_handle(&self) -> RawHandle {
         self.0.as_raw_handle()
     }
 }
 
-impl IntoRawHandle for AsyncStdSocketpairStream {
-    #[inline]
-    fn into_raw_handle(self) -> RawHandle {
-        self.0.into_raw_handle()
-    }
-}
-
-impl FromRawHandle for AsyncStdSocketpairStream {
+impl FromRawHandle for TokioSocketpairStream {
     #[inline]
     unsafe fn from_raw_handle(raw_handle: RawHandle) -> Self {
         Self(File::from_raw_handle(raw_handle))
     }
 }
 
-impl AsRawHandleOrSocket for AsyncStdSocketpairStream {
+impl AsRawHandleOrSocket for TokioSocketpairStream {
     #[inline]
     fn as_raw_handle_or_socket(&self) -> RawHandleOrSocket {
         self.0.as_raw_handle_or_socket()
     }
 }
 
-impl IntoRawHandleOrSocket for AsyncStdSocketpairStream {
-    #[inline]
-    fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
-        self.0.into_raw_handle_or_socket()
-    }
-}
-
-impl AsRawReadWriteHandleOrSocket for AsyncStdSocketpairStream {
+impl AsRawReadWriteHandleOrSocket for TokioSocketpairStream {
     #[inline]
     fn as_raw_read_handle_or_socket(&self) -> RawHandleOrSocket {
         self.as_raw_handle_or_socket()
@@ -208,15 +183,15 @@ impl AsRawReadWriteHandleOrSocket for AsyncStdSocketpairStream {
     }
 }
 
-/// Safety: `AsyncStdSocketpairStream` wraps a `TcpStream` which owns its handle.
-unsafe impl OwnsRaw for AsyncStdSocketpairStream {}
+/// Safety: `TokioSocketpairStream` wraps a `TcpStream` which owns its handle.
+unsafe impl OwnsRaw for TokioSocketpairStream {}
 
-impl Debug for AsyncStdSocketpairStream {
+impl Debug for TokioSocketpairStream {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Just print the handles; don't try to print the path or any
         // information about it, because this information is otherwise
         // unavailable to safe Rust code.
-        f.debug_struct("AsyncStdSocketpairStream")
+        f.debug_struct("TokioSocketpairStream")
             .field("raw_handle", &self.0.as_raw_handle())
             .finish()
     }
