@@ -5,10 +5,7 @@ use std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     net::TcpStream,
 };
-use unsafe_io::{
-    os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd},
-    OwnsRaw,
-};
+use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
@@ -170,9 +167,6 @@ impl AsRawReadWriteFd for SocketpairStream {
         self.as_raw_fd()
     }
 }
-
-/// Safety: `SocketpairStream` wraps a `TcpStream` which owns its handle.
-unsafe impl OwnsRaw for SocketpairStream {}
 
 impl Debug for SocketpairStream {
     #[allow(clippy::missing_inline_in_public_items)]

@@ -11,10 +11,7 @@ use tokio::{
     io::{self, AsyncRead, AsyncWrite, ReadBuf},
     net::UnixStream,
 };
-use unsafe_io::{
-    os::posish::{AsRawFd, AsRawReadWriteFd, RawFd},
-    OwnsRaw,
-};
+use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`UnixStream`] except that it does not have a name or address.
@@ -112,9 +109,6 @@ impl AsRawReadWriteFd for TokioSocketpairStream {
         self.as_raw_fd()
     }
 }
-
-/// Safety: `SocketpairStream` wraps a `UnixStream` which owns its handle.
-unsafe impl OwnsRaw for TokioSocketpairStream {}
 
 impl Debug for TokioSocketpairStream {
     #[allow(clippy::missing_inline_in_public_items)]

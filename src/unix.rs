@@ -6,10 +6,7 @@ use std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     os::unix::net::UnixStream,
 };
-use unsafe_io::{
-    os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd},
-    OwnsRaw,
-};
+use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(unix_socket_peek))]
 use {io_lifetimes::AsSocketlike, std::net::TcpStream};
 
@@ -179,9 +176,6 @@ impl AsRawReadWriteFd for SocketpairStream {
         self.as_raw_fd()
     }
 }
-
-/// Safety: `SocketpairStream` wraps a `UnixStream` which owns its handle.
-unsafe impl OwnsRaw for SocketpairStream {}
 
 impl Debug for SocketpairStream {
     #[allow(clippy::missing_inline_in_public_items)]

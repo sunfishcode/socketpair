@@ -11,10 +11,7 @@ use std::{
     pin::Pin,
     task::{Context, Poll},
 };
-use unsafe_io::{
-    os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd},
-    OwnsRaw,
-};
+use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`UnixStream`] except that it does not have a name or address.
@@ -150,9 +147,6 @@ impl AsRawReadWriteFd for AsyncStdSocketpairStream {
         self.as_raw_fd()
     }
 }
-
-/// Safety: `SocketpairStream` wraps a `UnixStream` which owns its handle.
-unsafe impl OwnsRaw for AsyncStdSocketpairStream {}
 
 impl Debug for AsyncStdSocketpairStream {
     #[allow(clippy::missing_inline_in_public_items)]

@@ -14,11 +14,8 @@ use std::{
     ptr,
     task::{Context, Poll},
 };
-use unsafe_io::{
-    os::windows::{
-        AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket,
-    },
-    OwnsRaw,
+use unsafe_io::os::windows::{
+    AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket,
 };
 use uuid::Uuid;
 use winapi::{
@@ -207,10 +204,6 @@ impl AsRawReadWriteHandleOrSocket for AsyncStdSocketpairStream {
         self.as_raw_handle_or_socket()
     }
 }
-
-/// Safety: `AsyncStdSocketpairStream` wraps a `TcpStream` which owns its
-/// handle.
-unsafe impl OwnsRaw for AsyncStdSocketpairStream {}
 
 impl Debug for AsyncStdSocketpairStream {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

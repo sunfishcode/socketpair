@@ -17,9 +17,8 @@ use tokio::{
     fs::File,
     io::{self, AsyncRead, AsyncWrite, ReadBuf},
 };
-use unsafe_io::{
-    os::windows::{AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket},
-    OwnsRaw,
+use unsafe_io::os::windows::{
+    AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket,
 };
 use uuid::Uuid;
 use winapi::{
@@ -182,9 +181,6 @@ impl AsRawReadWriteHandleOrSocket for TokioSocketpairStream {
         self.as_raw_handle_or_socket()
     }
 }
-
-/// Safety: `TokioSocketpairStream` wraps a `TcpStream` which owns its handle.
-unsafe impl OwnsRaw for TokioSocketpairStream {}
 
 impl Debug for TokioSocketpairStream {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
