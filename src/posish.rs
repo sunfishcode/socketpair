@@ -142,6 +142,13 @@ impl IntoRawFd for SocketpairStream {
     }
 }
 
+impl IntoFd for SocketpairStream {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.0.into_fd()
+    }
+}
+
 impl FromRawFd for SocketpairStream {
     #[inline]
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
@@ -165,6 +172,18 @@ impl AsRawReadWriteFd for SocketpairStream {
     #[inline]
     fn as_raw_write_fd(&self) -> RawFd {
         self.as_raw_fd()
+    }
+}
+
+impl AsReadWriteFd for SocketpairStream {
+    #[inline]
+    fn as_read_fd(&self) -> BorrowedFd<'_> {
+        self.as_fd()
+    }
+
+    #[inline]
+    fn as_write_fd(&self) -> BorrowedFd<'_> {
+        self.as_fd()
     }
 }
 

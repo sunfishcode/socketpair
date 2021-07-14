@@ -11,7 +11,7 @@ use tokio::{
     io::{self, AsyncRead, AsyncWrite, ReadBuf},
     net::UnixStream,
 };
-use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, RawFd};
+use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`UnixStream`] except that it does not have a name or address.
@@ -107,6 +107,18 @@ impl AsRawReadWriteFd for TokioSocketpairStream {
     #[inline]
     fn as_raw_write_fd(&self) -> RawFd {
         self.as_raw_fd()
+    }
+}
+
+impl AsReadWriteFd for TokioSocketpairStream {
+    #[inline]
+    fn as_read_fd(&self) -> BorrowedFd<'_> {
+        self.as_fd()
+    }
+
+    #[inline]
+    fn as_write_fd(&self) -> BorrowedFd<'_> {
+        self.as_fd()
     }
 }
 

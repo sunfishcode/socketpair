@@ -6,6 +6,7 @@ use async_std::{
     os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
     path::Path,
 };
+use io_lifetimes::{AsHandle, BorrowedHandle, IntoHandle, OwnedHandle};
 use std::{
     convert::TryInto,
     fmt::{self, Debug},
@@ -15,7 +16,9 @@ use std::{
     task::{Context, Poll},
 };
 use unsafe_io::os::windows::{
-    AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket,
+    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
+    BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
+    RawHandleOrSocket,
 };
 use uuid::Uuid;
 use winapi::{
@@ -165,10 +168,24 @@ impl AsRawHandle for AsyncStdSocketpairStream {
     }
 }
 
+impl AsHandle for AsyncStdSocketpairStream {
+    #[inline]
+    fn as_handle(&self) -> BorrowedHandle<'_> {
+        self.0.as_handle()
+    }
+}
+
 impl IntoRawHandle for AsyncStdSocketpairStream {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.0.into_raw_handle()
+    }
+}
+
+impl IntoHandle for AsyncStdSocketpairStream {
+    #[inline]
+    fn into_handle(self) -> OwnedHandle {
+        self.0.into_handle()
     }
 }
 
@@ -186,10 +203,24 @@ impl AsRawHandleOrSocket for AsyncStdSocketpairStream {
     }
 }
 
+impl AsHandleOrSocket for AsyncStdSocketpairStream {
+    #[inline]
+    fn as_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.0.as_handle_or_socket()
+    }
+}
+
 impl IntoRawHandleOrSocket for AsyncStdSocketpairStream {
     #[inline]
     fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
         self.0.into_raw_handle_or_socket()
+    }
+}
+
+impl IntoHandleOrSocket for AsyncStdSocketpairStream {
+    #[inline]
+    fn into_handle_or_socket(self) -> OwnedHandleOrSocket {
+        self.0.into_handle_or_socket()
     }
 }
 
@@ -202,6 +233,18 @@ impl AsRawReadWriteHandleOrSocket for AsyncStdSocketpairStream {
     #[inline]
     fn as_raw_write_handle_or_socket(&self) -> RawHandleOrSocket {
         self.as_raw_handle_or_socket()
+    }
+}
+
+impl AsReadWriteHandleOrSocket for AsyncStdSocketpairStream {
+    #[inline]
+    fn as_read_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.as_handle_or_socket()
+    }
+
+    #[inline]
+    fn as_write_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.as_handle_or_socket()
     }
 }
 

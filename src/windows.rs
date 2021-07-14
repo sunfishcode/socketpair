@@ -1,5 +1,6 @@
 //! `SocketpairStream` and `socketpair_stream` for Windows.
 
+use io_lifetimes::{AsHandle, BorrowedHandle, IntoHandle, OwnedHandle};
 use std::{
     cmp::min,
     convert::TryInto,
@@ -15,7 +16,9 @@ use std::{
     ptr,
 };
 use unsafe_io::os::windows::{
-    AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, IntoRawHandleOrSocket, RawHandleOrSocket,
+    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
+    BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
+    RawHandleOrSocket,
 };
 use uuid::Uuid;
 use winapi::{
@@ -217,10 +220,24 @@ impl AsRawHandle for SocketpairStream {
     }
 }
 
+impl AsHandle for SocketpairStream {
+    #[inline]
+    fn as_handle(&self) -> BorrowedHandle<'_> {
+        self.0.as_handle()
+    }
+}
+
 impl IntoRawHandle for SocketpairStream {
     #[inline]
     fn into_raw_handle(self) -> RawHandle {
         self.0.into_raw_handle()
+    }
+}
+
+impl IntoHandle for SocketpairStream {
+    #[inline]
+    fn into_handle(self) -> OwnedHandle {
+        self.0.into_handle()
     }
 }
 
@@ -238,10 +255,24 @@ impl AsRawHandleOrSocket for SocketpairStream {
     }
 }
 
+impl AsHandleOrSocket for SocketpairStream {
+    #[inline]
+    fn as_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.0.as_handle_or_socket()
+    }
+}
+
 impl IntoRawHandleOrSocket for SocketpairStream {
     #[inline]
     fn into_raw_handle_or_socket(self) -> RawHandleOrSocket {
         self.0.into_raw_handle_or_socket()
+    }
+}
+
+impl IntoHandleOrSocket for SocketpairStream {
+    #[inline]
+    fn into_handle_or_socket(self) -> OwnedHandleOrSocket {
+        self.0.into_handle_or_socket()
     }
 }
 
@@ -254,6 +285,18 @@ impl AsRawReadWriteHandleOrSocket for SocketpairStream {
     #[inline]
     fn as_raw_write_handle_or_socket(&self) -> RawHandleOrSocket {
         self.as_raw_handle_or_socket()
+    }
+}
+
+impl AsReadWriteHandleOrSocket for SocketpairStream {
+    #[inline]
+    fn as_read_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.as_handle_or_socket()
+    }
+
+    #[inline]
+    fn as_write_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.as_handle_or_socket()
     }
 }
 

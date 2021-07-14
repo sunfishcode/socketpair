@@ -1,5 +1,6 @@
 //! `TokioSocketpairStream` and `tokio_socketpair_stream` for Windows.
 
+use io_lifetimes::{AsHandle, BorrowedHandle};
 use std::{
     convert::TryInto,
     fmt::{self, Debug},
@@ -18,7 +19,8 @@ use tokio::{
     io::{self, AsyncRead, AsyncWrite, ReadBuf},
 };
 use unsafe_io::os::windows::{
-    AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, RawHandleOrSocket,
+    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
+    BorrowedHandleOrSocket, RawHandleOrSocket,
 };
 use uuid::Uuid;
 use winapi::{
@@ -156,6 +158,13 @@ impl AsRawHandle for TokioSocketpairStream {
     }
 }
 
+impl AsHandle for TokioSocketpairStream {
+    #[inline]
+    fn as_handle(&self) -> BorrowedHandle<'_> {
+        self.0.as_handle()
+    }
+}
+
 impl FromRawHandle for TokioSocketpairStream {
     #[inline]
     unsafe fn from_raw_handle(raw_handle: RawHandle) -> Self {
@@ -170,6 +179,13 @@ impl AsRawHandleOrSocket for TokioSocketpairStream {
     }
 }
 
+impl AsHandleOrSocket for TokioSocketpairStream {
+    #[inline]
+    fn as_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.0.as_handle_or_socket()
+    }
+}
+
 impl AsRawReadWriteHandleOrSocket for TokioSocketpairStream {
     #[inline]
     fn as_raw_read_handle_or_socket(&self) -> RawHandleOrSocket {
@@ -179,6 +195,18 @@ impl AsRawReadWriteHandleOrSocket for TokioSocketpairStream {
     #[inline]
     fn as_raw_write_handle_or_socket(&self) -> RawHandleOrSocket {
         self.as_raw_handle_or_socket()
+    }
+}
+
+impl AsReadWriteHandleOrSocket for TokioSocketpairStream {
+    #[inline]
+    fn as_read_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.as_handle_or_socket()
+    }
+
+    #[inline]
+    fn as_write_handle_or_socket(&self) -> BorrowedHandleOrSocket<'_> {
+        self.as_handle_or_socket()
     }
 }
 

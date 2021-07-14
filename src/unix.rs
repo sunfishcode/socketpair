@@ -6,7 +6,9 @@ use std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     os::unix::net::UnixStream,
 };
-use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::os::posish::{
+    AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
+};
 #[cfg(not(unix_socket_peek))]
 use {io_lifetimes::AsSocketlike, std::net::TcpStream};
 
@@ -174,6 +176,18 @@ impl AsRawReadWriteFd for SocketpairStream {
     #[inline]
     fn as_raw_write_fd(&self) -> RawFd {
         self.as_raw_fd()
+    }
+}
+
+impl AsReadWriteFd for SocketpairStream {
+    #[inline]
+    fn as_read_fd(&self) -> BorrowedFd<'_> {
+        self.as_fd()
+    }
+
+    #[inline]
+    fn as_write_fd(&self) -> BorrowedFd<'_> {
+        self.as_fd()
     }
 }
 
