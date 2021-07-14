@@ -1,5 +1,6 @@
 //! `TokioSocketpairStream` and `tokio_socketpair_stream` for Unix platforms.
 
+use io_lifetimes::{AsFd, BorrowedFd};
 use std::{
     fmt::{self, Debug},
     io::IoSlice,
@@ -35,7 +36,7 @@ impl TokioSocketpairStream {
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        posish::io::fionread(self)
+        Ok(posish::io::ioctl_fionread(self)?)
     }
 }
 
@@ -90,6 +91,13 @@ impl AsRawFd for TokioSocketpairStream {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.0.as_raw_fd()
+    }
+}
+
+impl AsFd for TokioSocketpairStream {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.0.as_fd()
     }
 }
 

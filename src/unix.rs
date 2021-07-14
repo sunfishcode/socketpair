@@ -1,16 +1,17 @@
 //! `SocketpairStream` and `socketpair_stream` for Posix-ish platforms.
 
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::{
     fmt::{self, Arguments, Debug},
     io::{self, IoSlice, IoSliceMut, Read, Write},
     os::unix::net::UnixStream,
 };
-#[cfg(not(unix_socket_peek))]
-use unsafe_io::AsUnsafeSocket;
 use unsafe_io::{
     os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd},
     OwnsRaw,
 };
+#[cfg(not(unix_socket_peek))]
+use {io_lifetimes::AsSocketlike, std::net::TcpStream};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`UnixStream`] except that it does not have a name or address.
@@ -36,14 +37,14 @@ impl SocketpairStream {
 
         #[cfg(not(unix_socket_peek))]
         {
-            self.0.as_tcp_stream_view().peek(buf)
+            self.0.as_socketlike_view::<TcpStream>().peek(buf)
         }
     }
 
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        posish::io::fionread(self)
+        Ok(posish::io::ioctl_fionread(self)?)
     }
 }
 
@@ -132,6 +133,13 @@ impl AsRawFd for SocketpairStream {
     }
 }
 
+impl AsFd for SocketpairStream {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.0.as_fd()
+    }
+}
+
 impl IntoRawFd for SocketpairStream {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -139,10 +147,24 @@ impl IntoRawFd for SocketpairStream {
     }
 }
 
+impl IntoFd for SocketpairStream {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.0.into_fd()
+    }
+}
+
 impl FromRawFd for SocketpairStream {
     #[inline]
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
         Self(UnixStream::from_raw_fd(raw_fd))
+    }
+}
+
+impl FromFd for SocketpairStream {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self(UnixStream::from_fd(fd))
     }
 }
 

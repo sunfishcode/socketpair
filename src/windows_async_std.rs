@@ -208,7 +208,8 @@ impl AsRawReadWriteHandleOrSocket for AsyncStdSocketpairStream {
     }
 }
 
-/// Safety: `AsyncStdSocketpairStream` wraps a `TcpStream` which owns its handle.
+/// Safety: `AsyncStdSocketpairStream` wraps a `TcpStream` which owns its
+/// handle.
 unsafe impl OwnsRaw for AsyncStdSocketpairStream {}
 
 impl Debug for AsyncStdSocketpairStream {

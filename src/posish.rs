@@ -40,7 +40,7 @@ impl SocketpairStream {
 /// Create a socketpair and return stream handles connected to each end.
 #[inline]
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
-    posish::io::socketpair_stream(libc::AF_UNIX, 0).map(|(a, b)| {
+    posish::io::socketpair_stream(posish::net::AF_UNIX, 0).map(|(a, b)| {
         let a = a.into_raw_fd();
         let b = b.into_raw_fd();
         unsafe {
@@ -131,6 +131,13 @@ impl AsRawFd for SocketpairStream {
     }
 }
 
+impl AsFd for SocketpairStream {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'f> {
+        self.0.as_fd()
+    }
+}
+
 impl IntoRawFd for SocketpairStream {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -142,6 +149,13 @@ impl FromRawFd for SocketpairStream {
     #[inline]
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
         Self(TcpStream::from_raw_fd(raw_fd))
+    }
+}
+
+impl FromFd for SocketpairStream {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self(UnixStream::from_fd(fd))
     }
 }
 

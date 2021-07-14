@@ -1,9 +1,11 @@
-//! `AsyncStdSocketpairStream` and `async_std_socketpair_stream` for Unix platforms.
+//! `AsyncStdSocketpairStream` and `async_std_socketpair_stream` for Unix
+//! platforms.
 
 use async_std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     os::unix::net::UnixStream,
 };
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::{
     fmt::{self, Debug},
     pin::Pin,
@@ -35,7 +37,7 @@ impl AsyncStdSocketpairStream {
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        posish::io::fionread(self)
+        Ok(posish::io::ioctl_fionread(self)?)
     }
 }
 
@@ -102,6 +104,13 @@ impl AsRawFd for AsyncStdSocketpairStream {
     }
 }
 
+impl AsFd for AsyncStdSocketpairStream {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.0.as_fd()
+    }
+}
+
 impl IntoRawFd for AsyncStdSocketpairStream {
     #[inline]
     fn into_raw_fd(self) -> RawFd {
@@ -109,10 +118,24 @@ impl IntoRawFd for AsyncStdSocketpairStream {
     }
 }
 
+impl IntoFd for AsyncStdSocketpairStream {
+    #[inline]
+    fn into_fd(self) -> OwnedFd {
+        self.0.into_fd()
+    }
+}
+
 impl FromRawFd for AsyncStdSocketpairStream {
     #[inline]
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
         Self(UnixStream::from_raw_fd(raw_fd))
+    }
+}
+
+impl FromFd for AsyncStdSocketpairStream {
+    #[inline]
+    fn from_fd(fd: OwnedFd) -> Self {
+        Self(UnixStream::from_fd(fd))
     }
 }
 
