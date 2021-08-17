@@ -1,10 +1,8 @@
 //! `SocketpairStream` and `socketpair_stream` for Posix-ish platforms.
 
-use std::{
-    fmt::{self, Arguments, Debug},
-    io::{self, IoSlice, IoSliceMut, Read, Write},
-    net::TcpStream,
-};
+use std::fmt::{self, Arguments, Debug};
+use std::io::{self, IoSlice, IoSliceMut, Read, Write};
+use std::net::TcpStream;
 use unsafe_io::os::rsix::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a

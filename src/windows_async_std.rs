@@ -1,39 +1,31 @@
 //! `AsyncStdSocketpairStream` and `async_std_socketpair_stream` for Windows.
 
-use async_std::{
-    fs::File,
-    io::{self, IoSlice, IoSliceMut, Read, Write},
-    os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    path::Path,
-};
+use async_std::fs::File;
+use async_std::io::{self, IoSlice, IoSliceMut, Read, Write};
+use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+use async_std::path::Path;
 use io_lifetimes::{AsHandle, BorrowedHandle, IntoHandle, OwnedHandle};
-use std::{
-    convert::TryInto,
-    fmt::{self, Debug},
-    os::windows::ffi::OsStrExt,
-    pin::Pin,
-    ptr,
-    task::{Context, Poll},
-};
+use std::convert::TryInto;
+use std::fmt::{self, Debug};
+use std::os::windows::ffi::OsStrExt;
+use std::pin::Pin;
+use std::ptr;
+use std::task::{Context, Poll};
 use unsafe_io::os::windows::{
     AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
     BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
     RawHandleOrSocket,
 };
 use uuid::Uuid;
-use winapi::{
-    shared::winerror::ERROR_ACCESS_DENIED,
-    um::{
-        fileapi::{CreateFileW, OPEN_EXISTING},
-        handleapi::INVALID_HANDLE_VALUE,
-        namedpipeapi::CreateNamedPipeW,
-        winbase::{
-            FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
-            PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
-        },
-        winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE},
-    },
+use winapi::shared::winerror::ERROR_ACCESS_DENIED;
+use winapi::um::fileapi::{CreateFileW, OPEN_EXISTING};
+use winapi::um::handleapi::INVALID_HANDLE_VALUE;
+use winapi::um::namedpipeapi::CreateNamedPipeW;
+use winapi::um::winbase::{
+    FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
+    PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
 };
+use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.

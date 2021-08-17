@@ -1,14 +1,10 @@
 //! `SocketpairStream` and `socketpair_stream` for Posix-ish platforms.
 
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
-use std::{
-    fmt::{self, Arguments, Debug},
-    io::{self, IoSlice, IoSliceMut, Read, Write},
-    os::unix::net::UnixStream,
-};
-use unsafe_io::os::rsix::{
-    AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
-};
+use std::fmt::{self, Arguments, Debug};
+use std::io::{self, IoSlice, IoSliceMut, Read, Write};
+use std::os::unix::net::UnixStream;
+use unsafe_io::os::rsix::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(unix_socket_peek))]
 use {io_lifetimes::AsSocketlike, std::net::TcpStream};
 

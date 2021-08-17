@@ -1,16 +1,12 @@
 //! `TokioSocketpairStream` and `tokio_socketpair_stream` for Unix platforms.
 
 use io_lifetimes::{AsFd, BorrowedFd};
-use std::{
-    fmt::{self, Debug},
-    io::IoSlice,
-    pin::Pin,
-    task::{Context, Poll},
-};
-use tokio::{
-    io::{self, AsyncRead, AsyncWrite, ReadBuf},
-    net::UnixStream,
-};
+use std::fmt::{self, Debug};
+use std::io::IoSlice;
+use std::pin::Pin;
+use std::task::{Context, Poll};
+use tokio::io::{self, AsyncRead, AsyncWrite, ReadBuf};
+use tokio::net::UnixStream;
 use unsafe_io::os::rsix::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a

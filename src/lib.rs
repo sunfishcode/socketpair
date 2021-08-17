@@ -6,10 +6,8 @@
 //!
 //! ```rust
 //! use socketpair::socketpair_stream;
-//! use std::{
-//!     io::{self, Read, Write},
-//!     thread,
-//! };
+//! use std::io::{self, Read, Write};
+//! use std::thread;
 //!
 //! fn main() -> anyhow::Result<()> {
 //!     let (mut a, mut b) = socketpair_stream()?;

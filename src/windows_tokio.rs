@@ -1,41 +1,31 @@
 //! `TokioSocketpairStream` and `tokio_socketpair_stream` for Windows.
 
 use io_lifetimes::{AsHandle, BorrowedHandle};
-use std::{
-    convert::TryInto,
-    fmt::{self, Debug},
-    io::IoSlice,
-    os::windows::{
-        ffi::OsStrExt,
-        io::{AsRawHandle, FromRawHandle, RawHandle},
-    },
-    path::Path,
-    pin::Pin,
-    ptr,
-    task::{Context, Poll},
-};
-use tokio::{
-    fs::File,
-    io::{self, AsyncRead, AsyncWrite, ReadBuf},
-};
+use std::convert::TryInto;
+use std::fmt::{self, Debug};
+use std::io::IoSlice;
+use std::os::windows::ffi::OsStrExt;
+use std::os::windows::io::{AsRawHandle, FromRawHandle, RawHandle};
+use std::path::Path;
+use std::pin::Pin;
+use std::ptr;
+use std::task::{Context, Poll};
+use tokio::fs::File;
+use tokio::io::{self, AsyncRead, AsyncWrite, ReadBuf};
 use unsafe_io::os::windows::{
     AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
     BorrowedHandleOrSocket, RawHandleOrSocket,
 };
 use uuid::Uuid;
-use winapi::{
-    shared::winerror::ERROR_ACCESS_DENIED,
-    um::{
-        fileapi::{CreateFileW, OPEN_EXISTING},
-        handleapi::INVALID_HANDLE_VALUE,
-        namedpipeapi::CreateNamedPipeW,
-        winbase::{
-            FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
-            PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
-        },
-        winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE},
-    },
+use winapi::shared::winerror::ERROR_ACCESS_DENIED;
+use winapi::um::fileapi::{CreateFileW, OPEN_EXISTING};
+use winapi::um::handleapi::INVALID_HANDLE_VALUE;
+use winapi::um::namedpipeapi::CreateNamedPipeW;
+use winapi::um::winbase::{
+    FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
+    PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
 };
+use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.

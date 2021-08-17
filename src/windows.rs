@@ -1,39 +1,32 @@
 //! `SocketpairStream` and `socketpair_stream` for Windows.
 
 use io_lifetimes::{AsHandle, BorrowedHandle, IntoHandle, OwnedHandle};
-use std::{
-    cmp::min,
-    convert::TryInto,
-    fmt::{self, Arguments, Debug},
-    fs::File,
-    io::{self, IoSlice, IoSliceMut, Read, Write},
-    mem::MaybeUninit,
-    os::windows::{
-        ffi::OsStrExt,
-        io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle},
-    },
-    path::Path,
-    ptr,
-};
+use std::cmp::min;
+use std::convert::TryInto;
+use std::fmt::{self, Arguments, Debug};
+use std::fs::File;
+use std::io::{self, IoSlice, IoSliceMut, Read, Write};
+use std::mem::MaybeUninit;
+use std::os::windows::ffi::OsStrExt;
+use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
+use std::path::Path;
+use std::ptr;
 use unsafe_io::os::windows::{
     AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
     BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
     RawHandleOrSocket,
 };
 use uuid::Uuid;
-use winapi::{
-    shared::{minwindef::LPVOID, winerror::ERROR_ACCESS_DENIED},
-    um::{
-        fileapi::{CreateFileW, OPEN_EXISTING},
-        handleapi::INVALID_HANDLE_VALUE,
-        namedpipeapi::{CreateNamedPipeW, PeekNamedPipe},
-        winbase::{
-            FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
-            PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
-        },
-        winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE},
-    },
+use winapi::shared::minwindef::LPVOID;
+use winapi::shared::winerror::ERROR_ACCESS_DENIED;
+use winapi::um::fileapi::{CreateFileW, OPEN_EXISTING};
+use winapi::um::handleapi::INVALID_HANDLE_VALUE;
+use winapi::um::namedpipeapi::{CreateNamedPipeW, PeekNamedPipe};
+use winapi::um::winbase::{
+    FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
+    PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
 };
+use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.

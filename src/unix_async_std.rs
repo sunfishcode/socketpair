@@ -1,19 +1,13 @@
 //! `AsyncStdSocketpairStream` and `async_std_socketpair_stream` for Unix
 //! platforms.
 
-use async_std::{
-    io::{self, IoSlice, IoSliceMut, Read, Write},
-    os::unix::net::UnixStream,
-};
+use async_std::io::{self, IoSlice, IoSliceMut, Read, Write};
+use async_std::os::unix::net::UnixStream;
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
-use std::{
-    fmt::{self, Debug},
-    pin::Pin,
-    task::{Context, Poll},
-};
-use unsafe_io::os::rsix::{
-    AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
-};
+use std::fmt::{self, Debug};
+use std::pin::Pin;
+use std::task::{Context, Poll};
+use unsafe_io::os::rsix::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`UnixStream`] except that it does not have a name or address.

@@ -1,10 +1,7 @@
 use socketpair::socketpair_stream;
-use std::{
-    io::{self, Read, Write},
-    str,
-    sync::{Arc, Condvar, Mutex},
-    thread,
-};
+use std::io::{self, Read, Write};
+use std::sync::{Arc, Condvar, Mutex};
+use std::{str, thread};
 
 #[test]
 fn test() -> anyhow::Result<()> {
