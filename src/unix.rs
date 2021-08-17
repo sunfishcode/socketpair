@@ -6,7 +6,7 @@ use std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     os::unix::net::UnixStream,
 };
-use unsafe_io::os::posish::{
+use unsafe_io::os::rsix::{
     AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
 };
 #[cfg(not(unix_socket_peek))]
@@ -43,7 +43,7 @@ impl SocketpairStream {
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        Ok(posish::io::ioctl_fionread(self)?)
+        Ok(rsix::io::ioctl_fionread(self)?)
     }
 }
 

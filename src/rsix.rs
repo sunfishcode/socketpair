@@ -5,7 +5,7 @@ use std::{
     io::{self, IoSlice, IoSliceMut, Read, Write},
     net::TcpStream,
 };
-use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd};
+use unsafe_io::os::rsix::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
@@ -30,14 +30,14 @@ impl SocketpairStream {
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        posish::io::fionread(self)
+        rsix::io::fionread(self)
     }
 }
 
 /// Create a socketpair and return stream handles connected to each end.
 #[inline]
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
-    posish::io::socketpair_stream(posish::net::AF_UNIX, 0).map(|(a, b)| {
+    rsix::io::socketpair_stream(rsix::net::AF_UNIX, 0).map(|(a, b)| {
         let a = a.into_raw_fd();
         let b = b.into_raw_fd();
         unsafe {

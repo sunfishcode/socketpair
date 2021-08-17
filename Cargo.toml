@@ -16,11 +16,11 @@ rustc_version = "0.4.0"
 [dependencies]
 async-std = { version = "1.9.0", optional = true }
 tokio = { version = "1.8.1", optional = true }
-unsafe-io = "0.7.0"
+unsafe-io = "0.8.1"
 io-lifetimes = "0.2.0"
 
 [target.'cfg(not(windows))'.dependencies]
-posish = "0.16.0"
+rsix = "0.18.0"
 
 [target.'cfg(windows)'.dependencies]
 uuid = { version = "0.8.1", features = ["v4"] }

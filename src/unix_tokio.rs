@@ -11,7 +11,7 @@ use tokio::{
     io::{self, AsyncRead, AsyncWrite, ReadBuf},
     net::UnixStream,
 };
-use unsafe_io::os::posish::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, RawFd};
+use unsafe_io::os::rsix::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`UnixStream`] except that it does not have a name or address.
@@ -33,7 +33,7 @@ impl TokioSocketpairStream {
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        Ok(posish::io::ioctl_fionread(self)?)
+        Ok(rsix::io::ioctl_fionread(self)?)
     }
 }
 

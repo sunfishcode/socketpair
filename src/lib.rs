@@ -30,7 +30,7 @@
 #![cfg_attr(write_all_vectored, feature(write_all_vectored))]
 
 #[cfg(not(any(windows, unix)))]
-mod posish;
+mod rsix;
 #[cfg(unix)]
 mod unix;
 #[cfg(all(unix, feature = "async-std"))]
@@ -45,7 +45,7 @@ mod windows_async_std;
 mod windows_tokio;
 
 #[cfg(not(any(windows, unix)))]
-pub use crate::posish::{socketpair_stream, SocketpairStream};
+pub use crate::rsix::{socketpair_stream, SocketpairStream};
 #[cfg(unix)]
 pub use crate::unix::{socketpair_stream, SocketpairStream};
 #[cfg(all(unix, feature = "async-std"))]
