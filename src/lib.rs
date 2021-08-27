@@ -26,6 +26,7 @@
 #![cfg_attr(can_vector, feature(can_vector))]
 #![cfg_attr(all(unix, unix_socket_peek), feature(unix_socket_peek))]
 #![cfg_attr(write_all_vectored, feature(write_all_vectored))]
+#![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
 #[cfg(not(any(windows, unix)))]
 mod rsix;
