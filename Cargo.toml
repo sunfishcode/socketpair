@@ -20,7 +20,7 @@ unsafe-io = "0.9.1"
 io-lifetimes = { version = "0.3.0", default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
-rsix = "0.20.0"
+rsix = "0.23.0"
 
 [target.'cfg(windows)'.dependencies]
 uuid = { version = "0.8.1", features = ["v4"] }
