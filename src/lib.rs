@@ -29,7 +29,7 @@
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
 #[cfg(not(any(windows, unix)))]
-mod rsix;
+mod rustix;
 #[cfg(unix)]
 mod unix;
 #[cfg(all(unix, feature = "async-std"))]
@@ -44,7 +44,7 @@ mod windows_async_std;
 mod windows_tokio;
 
 #[cfg(not(any(windows, unix)))]
-pub use crate::rsix::{socketpair_stream, SocketpairStream};
+pub use crate::rustix::{socketpair_stream, SocketpairStream};
 #[cfg(unix)]
 pub use crate::unix::{socketpair_stream, SocketpairStream};
 #[cfg(all(unix, feature = "async-std"))]

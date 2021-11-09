@@ -1,5 +1,10 @@
 //! `SocketpairStream` and `socketpair_stream` for Windows.
 
+use io_extras::os::windows::{
+    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
+    BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
+    RawHandleOrSocket,
+};
 use io_lifetimes::{AsHandle, BorrowedHandle, IntoHandle, OwnedHandle};
 use std::cmp::min;
 use std::convert::TryInto;
@@ -11,11 +16,6 @@ use std::os::windows::ffi::OsStrExt;
 use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use std::path::Path;
 use std::ptr;
-use unsafe_io::os::windows::{
-    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
-    BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
-    RawHandleOrSocket,
-};
 use uuid::Uuid;
 use winapi::shared::minwindef::LPVOID;
 use winapi::shared::winerror::ERROR_ACCESS_DENIED;

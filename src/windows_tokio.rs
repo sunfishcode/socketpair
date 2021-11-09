@@ -1,5 +1,9 @@
 //! `TokioSocketpairStream` and `tokio_socketpair_stream` for Windows.
 
+use io_extras::os::windows::{
+    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
+    BorrowedHandleOrSocket, RawHandleOrSocket,
+};
 use io_lifetimes::{AsHandle, BorrowedHandle};
 use std::convert::TryInto;
 use std::fmt::{self, Debug};
@@ -12,10 +16,6 @@ use std::ptr;
 use std::task::{Context, Poll};
 use tokio::fs::File;
 use tokio::io::{self, AsyncRead, AsyncWrite, ReadBuf};
-use unsafe_io::os::windows::{
-    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
-    BorrowedHandleOrSocket, RawHandleOrSocket,
-};
 use uuid::Uuid;
 use winapi::shared::winerror::ERROR_ACCESS_DENIED;
 use winapi::um::fileapi::{CreateFileW, OPEN_EXISTING};

@@ -1,10 +1,12 @@
 //! `SocketpairStream` and `socketpair_stream` for Posix-ish platforms.
 
+use io_extras::os::rustix::{
+    AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
+};
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use std::fmt::{self, Arguments, Debug};
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use std::os::unix::net::UnixStream;
-use unsafe_io::os::rsix::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd};
 #[cfg(not(unix_socket_peek))]
 use {io_lifetimes::AsSocketlike, std::net::TcpStream};
 
@@ -39,7 +41,7 @@ impl SocketpairStream {
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        Ok(rsix::io::ioctl_fionread(self)?)
+        Ok(rustix::io::ioctl_fionread(self)?)
     }
 }
 

@@ -4,6 +4,11 @@ use async_std::fs::File;
 use async_std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle};
 use async_std::path::Path;
+use io_extras::os::windows::{
+    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
+    BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
+    RawHandleOrSocket,
+};
 use io_lifetimes::{AsHandle, BorrowedHandle, IntoHandle, OwnedHandle};
 use std::convert::TryInto;
 use std::fmt::{self, Debug};
@@ -11,11 +16,6 @@ use std::os::windows::ffi::OsStrExt;
 use std::pin::Pin;
 use std::ptr;
 use std::task::{Context, Poll};
-use unsafe_io::os::windows::{
-    AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
-    BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
-    RawHandleOrSocket,
-};
 use uuid::Uuid;
 use winapi::shared::winerror::ERROR_ACCESS_DENIED;
 use winapi::um::fileapi::{CreateFileW, OPEN_EXISTING};

@@ -1,5 +1,6 @@
 //! `TokioSocketpairStream` and `tokio_socketpair_stream` for Unix platforms.
 
+use io_extras::os::rustix::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, RawFd};
 use io_lifetimes::{AsFd, BorrowedFd};
 use std::fmt::{self, Debug};
 use std::io::IoSlice;
@@ -7,7 +8,6 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use tokio::io::{self, AsyncRead, AsyncWrite, ReadBuf};
 use tokio::net::UnixStream;
-use unsafe_io::os::rsix::{AsRawFd, AsRawReadWriteFd, AsReadWriteFd, RawFd};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`UnixStream`] except that it does not have a name or address.
@@ -29,7 +29,7 @@ impl TokioSocketpairStream {
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        Ok(rsix::io::ioctl_fionread(self)?)
+        Ok(rustix::io::ioctl_fionread(self)?)
     }
 }
 
