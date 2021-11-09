@@ -156,7 +156,7 @@ pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)
     Ok((first, second))
 }
 
-pub fn open_second_handle(path: Vec<u16>) -> io::Result<SocketpairStream> {
+fn open_second_handle(path: Vec<u16>) -> io::Result<SocketpairStream> {
     let second_raw_handle = unsafe {
         CreateFileW(
             path.as_ptr(),
