@@ -31,10 +31,8 @@ use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE};
 /// [`TcpStream`] except that it does not have a name or address.
 ///
 /// [`TcpStream`]: async_std::net::TcpStream
-///
-/// TODO: Make this `Clone` once async-std releases with
-/// https://github.com/async-rs/async-std/pull/937
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct AsyncStdSocketpairStream(File);
 
 impl AsyncStdSocketpairStream {
