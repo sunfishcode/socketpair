@@ -42,7 +42,7 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
     Ok(rustix::net::socketpair(
         AddressFamily::UNIX,
         SocketType::STREAM,
-        SocketFlags::empty(),
+        SocketFlags::CLOEXEC,
         Protocol::default(),
     )
     .map(|(a, b)| {
