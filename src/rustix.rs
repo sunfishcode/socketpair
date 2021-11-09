@@ -57,6 +57,27 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
     })?)
 }
 
+/// Create a socketpair and return seqpacket handles connected to each end.
+#[inline]
+pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
+    Ok(rustix::net::socketpair(
+        AddressFamily::UNIX,
+        SocketType::SEQPACKET,
+        SocketFlags::CLOEXEC,
+        Protocol::default(),
+    )
+    .map(|(a, b)| {
+        let a = a.into_raw_fd();
+        let b = b.into_raw_fd();
+        unsafe {
+            (
+                SocketpairStream::from_raw_fd(a),
+                SocketpairStream::from_raw_fd(b),
+            )
+        }
+    })?)
+}
+
 impl Read for SocketpairStream {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {

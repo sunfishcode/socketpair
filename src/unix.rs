@@ -4,6 +4,7 @@ use io_extras::os::rustix::{
     AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
 };
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use rustix::net::{AddressFamily, Protocol, SocketFlags, SocketType};
 use std::fmt::{self, Arguments, Debug};
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use std::os::unix::net::UnixStream;
@@ -49,6 +50,27 @@ impl SocketpairStream {
 #[inline]
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
     UnixStream::pair().map(|(a, b)| (SocketpairStream(a), SocketpairStream(b)))
+}
+
+/// Create a socketpair and return seqpacket handles connected to each end.
+#[inline]
+pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
+    Ok(rustix::net::socketpair(
+        AddressFamily::UNIX,
+        SocketType::SEQPACKET,
+        SocketFlags::CLOEXEC,
+        Protocol::default(),
+    )
+    .map(|(a, b)| {
+        let a = a.into_raw_fd();
+        let b = b.into_raw_fd();
+        unsafe {
+            (
+                SocketpairStream::from_raw_fd(a),
+                SocketpairStream::from_raw_fd(b),
+            )
+        }
+    })?)
 }
 
 impl Read for SocketpairStream {
