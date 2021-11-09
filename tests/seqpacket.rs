@@ -100,7 +100,10 @@ fn try_clone() -> anyhow::Result<()> {
     let mut buf = vec![0_u8; 6];
     b.read_exact(&mut buf)?;
     assert_eq!(str::from_utf8(&buf).unwrap(), "hello ");
-    assert_eq!(c.read_exact(&mut buf).unwrap_err().kind(), io::ErrorKind::UnexpectedEof);
+    assert_eq!(
+        c.read_exact(&mut buf).unwrap_err().kind(),
+        io::ErrorKind::UnexpectedEof
+    );
 
     Ok(())
 }
@@ -110,7 +113,10 @@ fn try_clone() -> anyhow::Result<()> {
 fn try_clone_two_writes() -> anyhow::Result<()> {
     let (mut a, mut b) = socketpair_seqpacket()?;
 
-    let _t = thread::spawn(move || -> io::Result<()> { write!(a, "hello ")?; writeln!(a, "world") });
+    let _t = thread::spawn(move || -> io::Result<()> {
+        write!(a, "hello ")?;
+        writeln!(a, "world")
+    });
 
     let mut c = b.try_clone()?;
 
