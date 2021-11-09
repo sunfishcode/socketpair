@@ -1,6 +1,10 @@
 //! `SocketpairStream` and `socketpair_stream` for Posix-ish platforms.
 
-use io_extras::os::rustix::{AsRawFd, AsRawReadWriteFd, FromRawFd, IntoRawFd, RawFd};
+use io_extras::os::rustix::{
+    AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
+};
+use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use rustix::net::{AddressFamily, Protocol, SocketFlags, SocketType};
 use std::fmt::{self, Arguments, Debug};
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use std::net::TcpStream;
@@ -28,14 +32,20 @@ impl SocketpairStream {
     /// Return the number of bytes which are ready to be read immediately.
     #[inline]
     pub fn num_ready_bytes(&self) -> io::Result<u64> {
-        rustix::io::fionread(self)
+        Ok(rustix::io::ioctl_fionread(self)?)
     }
 }
 
 /// Create a socketpair and return stream handles connected to each end.
 #[inline]
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
-    rustix::io::socketpair_stream(rustix::net::AF_UNIX, 0).map(|(a, b)| {
+    Ok(rustix::net::socketpair(
+        AddressFamily::UNIX,
+        SocketType::STREAM,
+        SocketFlags::empty(),
+        Protocol::default(),
+    )
+    .map(|(a, b)| {
         let a = a.into_raw_fd();
         let b = b.into_raw_fd();
         unsafe {
@@ -44,7 +54,7 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
                 SocketpairStream::from_raw_fd(b),
             )
         }
-    })
+    })?)
 }
 
 impl Read for SocketpairStream {
@@ -128,7 +138,7 @@ impl AsRawFd for SocketpairStream {
 
 impl AsFd for SocketpairStream {
     #[inline]
-    fn as_fd(&self) -> BorrowedFd<'f> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.0.as_fd()
     }
 }
@@ -157,7 +167,7 @@ impl FromRawFd for SocketpairStream {
 impl FromFd for SocketpairStream {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self(UnixStream::from_fd(fd))
+        Self(TcpStream::from_fd(fd))
     }
 }
 
