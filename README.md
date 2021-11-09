@@ -12,7 +12,23 @@
   </p>
 </div>
 
-This crate wraps [`socketpair`] with `AF_UNIX` and `SOCK_STREAM` on Posix-ish
-platforms, and emulates this interface using `CreateNamedPipe` on Windows.
+This crate wraps [`socketpair`] with `AF_UNIX` platforms, and emulates this
+interface using `CreateNamedPipe` on Windows.
+
+It has a "stream" interface, which corresponds to `SOCK_STREAM` and
+`PIPE_TYPE_BYTE`, and a "seqpacket" interface, which corresponds to
+`SOCK_SEQPACKET` and `PIPE_TYPE_MESSAGE`.
+
+## Example
+
+```rust
+let (mut a, mut b) = socketpair_stream()?;
+
+writeln!(a, "hello world")?;
+
+let mut buf = [0_u8; 4096];
+let n = b.read(&mut buf)?;
+assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "hello world\n");
+```
 
 [`socketpair`]: https://man7.org/linux/man-pages/man2/socketpair.2.html
