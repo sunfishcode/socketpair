@@ -39,22 +39,35 @@ impl SocketpairStream {
 /// Create a socketpair and return stream handles connected to each end.
 #[inline]
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
-    Ok(rustix::net::socketpair(
+    let (a, b) = rustix::net::socketpair(
         AddressFamily::UNIX,
         SocketType::STREAM,
         SocketFlags::CLOEXEC,
         Protocol::default(),
-    )
-    .map(|(a, b)| {
-        let a = a.into_raw_fd();
-        let b = b.into_raw_fd();
-        unsafe {
-            (
-                SocketpairStream::from_raw_fd(a),
-                SocketpairStream::from_raw_fd(b),
-            )
-        }
-    })?)
+    )?;
+    unsafe {
+        Ok((
+            SocketpairStream::from_raw_fd(a.into_raw_fd()),
+            SocketpairStream::from_raw_fd(b.into_raw_fd()),
+        ))
+    }
+}
+
+/// Create a socketpair and return seqpacket handles connected to each end.
+#[inline]
+pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
+    let (a, b) = rustix::net::socketpair(
+        AddressFamily::UNIX,
+        SocketType::SEQPACKET,
+        SocketFlags::CLOEXEC,
+        Protocol::default(),
+    )?;
+    unsafe {
+        Ok((
+            SocketpairStream::from_raw_fd(a.into_raw_fd()),
+            SocketpairStream::from_raw_fd(b.into_raw_fd()),
+        ))
+    }
 }
 
 impl Read for SocketpairStream {

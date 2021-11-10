@@ -23,8 +23,8 @@ use winapi::um::fileapi::{CreateFileW, OPEN_EXISTING};
 use winapi::um::handleapi::INVALID_HANDLE_VALUE;
 use winapi::um::namedpipeapi::{CreateNamedPipeW, PeekNamedPipe};
 use winapi::um::winbase::{
-    FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
-    PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
+    FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE, PIPE_READMODE_MESSAGE,
+    PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_TYPE_MESSAGE, PIPE_UNLIMITED_INSTANCES,
 };
 use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE};
 
@@ -115,6 +115,48 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
     };
     let first = unsafe { SocketpairStream::from_raw_handle(first_raw_handle) };
 
+    let second = open_second_handle(path)?;
+
+    Ok((first, second))
+}
+
+/// Create a socketpair and return seqpacket handles connected to each end.
+pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
+    let (first_raw_handle, path) = loop {
+        let name = format!("\\\\.\\pipe\\{}", Uuid::new_v4());
+        let mut path = Path::new(&name)
+            .as_os_str()
+            .encode_wide()
+            .collect::<Vec<_>>();
+        path.push(0);
+        let first_raw_handle = unsafe {
+            CreateNamedPipeW(
+                path.as_ptr(),
+                PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE,
+                PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_REJECT_REMOTE_CLIENTS,
+                PIPE_UNLIMITED_INSTANCES,
+                4096,
+                4096,
+                0,
+                ptr::null_mut(),
+            )
+        };
+        if first_raw_handle != INVALID_HANDLE_VALUE {
+            break (first_raw_handle, path);
+        }
+        let err = io::Error::last_os_error();
+        if err.raw_os_error() != Some(ERROR_ACCESS_DENIED.try_into().unwrap()) {
+            return Err(err);
+        }
+    };
+    let first = unsafe { SocketpairStream::from_raw_handle(first_raw_handle) };
+
+    let second = open_second_handle(path)?;
+
+    Ok((first, second))
+}
+
+fn open_second_handle(path: Vec<u16>) -> io::Result<SocketpairStream> {
     let second_raw_handle = unsafe {
         CreateFileW(
             path.as_ptr(),
@@ -131,7 +173,7 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
     }
     let second = unsafe { SocketpairStream::from_raw_handle(second_raw_handle) };
 
-    Ok((first, second))
+    Ok(second)
 }
 
 impl Read for SocketpairStream {
