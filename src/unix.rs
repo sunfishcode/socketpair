@@ -4,6 +4,7 @@ use io_extras::os::rustix::{
     AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
 };
 use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+#[cfg(not(any(target_os = "ios", target_os = "macos")))]
 use rustix::net::{AddressFamily, Protocol, SocketFlags, SocketType};
 use std::fmt::{self, Arguments, Debug};
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
@@ -53,6 +54,10 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
 }
 
 /// Create a socketpair and return seqpacket handles connected to each end.
+///
+/// Note that this is not available on macOS or ios due to missing OS support
+/// for `SOCK_SEQPACKET` with `AF_UNIX`.
+#[cfg(not(any(target_os = "ios", target_os = "macos")))]
 #[inline]
 pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
     let (a, b) = rustix::net::socketpair(

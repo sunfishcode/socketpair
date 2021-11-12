@@ -45,8 +45,10 @@ mod windows_tokio;
 
 #[cfg(not(any(windows, unix)))]
 pub use crate::rustix::{socketpair_seqpacket, socketpair_stream, SocketpairStream};
+#[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]
+pub use crate::unix::socketpair_seqpacket;
 #[cfg(unix)]
-pub use crate::unix::{socketpair_seqpacket, socketpair_stream, SocketpairStream};
+pub use crate::unix::{socketpair_stream, SocketpairStream};
 #[cfg(all(unix, feature = "async-std"))]
 pub use crate::unix_async_std::{async_std_socketpair_stream, AsyncStdSocketpairStream};
 #[cfg(all(unix, feature = "tokio"))]

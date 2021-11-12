@@ -54,6 +54,10 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
 }
 
 /// Create a socketpair and return seqpacket handles connected to each end.
+///
+/// Note that this is not available on macOS or ios due to missing OS support
+/// for `SOCK_SEQPACKET` with `AF_UNIX`.
+#[cfg(not(any(target_os = "ios", target_os = "macos")))]
 #[inline]
 pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
     let (a, b) = rustix::net::socketpair(
