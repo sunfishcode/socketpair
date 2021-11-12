@@ -1,3 +1,5 @@
+#![cfg(not(any(target_os = "ios", target_os = "macos")))]
+
 use socketpair::socketpair_seqpacket;
 use std::io::{self, Read, Write};
 use std::sync::{Arc, Condvar, Mutex};
