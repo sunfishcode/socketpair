@@ -182,8 +182,8 @@ fn test_reliable() -> anyhow::Result<()> {
         Ok(())
     });
 
+    thread_c.join().unwrap()?;
     thread_a.join().unwrap()?;
     thread_b.join().unwrap()?;
-    thread_c.join().unwrap()?;
     Ok(())
 }
