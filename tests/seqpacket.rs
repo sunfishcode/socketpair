@@ -167,11 +167,14 @@ fn test_reliable() -> anyhow::Result<()> {
         for _ in 0..0x10000 {
             let n = c.read(&mut buf)?;
             let s = str::from_utf8(&buf[..n]).unwrap();
+            dbg!(s);
             if let Some(x) = s.strip_prefix("thread A: ") {
+                dbg!(x);
                 let new_a = u32::from_str(x).unwrap();
                 assert_eq!(new_a, expect_a);
                 expect_a = new_a + 1;
             } else if let Some(x) = s.strip_prefix("thread B: ") {
+                dbg!(x);
                 let new_b = u32::from_str(x).unwrap();
                 assert_eq!(new_b, expect_b);
                 expect_b = new_b + 1;
