@@ -28,10 +28,8 @@
 #![cfg_attr(write_all_vectored, feature(write_all_vectored))]
 #![cfg_attr(io_lifetimes_use_std, feature(io_safety))]
 
-#[cfg(not(any(windows, unix)))]
+#[cfg(not(windows))]
 mod rustix;
-#[cfg(unix)]
-mod unix;
 #[cfg(all(unix, feature = "async-std"))]
 mod unix_async_std;
 #[cfg(all(unix, feature = "tokio"))]
@@ -43,12 +41,10 @@ mod windows_async_std;
 #[cfg(all(windows, feature = "tokio"))]
 mod windows_tokio;
 
-#[cfg(not(any(windows, unix)))]
-pub use crate::rustix::{socketpair_seqpacket, socketpair_stream, SocketpairStream};
 #[cfg(all(unix, not(any(target_os = "ios", target_os = "macos"))))]
-pub use crate::unix::socketpair_seqpacket;
+pub use crate::rustix::socketpair_seqpacket;
 #[cfg(unix)]
-pub use crate::unix::{socketpair_stream, SocketpairStream};
+pub use crate::rustix::{socketpair_stream, SocketpairStream};
 #[cfg(all(unix, feature = "async-std"))]
 pub use crate::unix_async_std::{async_std_socketpair_stream, AsyncStdSocketpairStream};
 #[cfg(all(unix, feature = "tokio"))]

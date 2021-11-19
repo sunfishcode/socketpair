@@ -7,12 +7,14 @@ use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
 use rustix::net::{AddressFamily, Protocol, SocketFlags, SocketType};
 use std::fmt::{self, Arguments, Debug};
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
-use std::net::TcpStream;
+use std::os::unix::net::UnixStream;
+#[cfg(not(unix_socket_peek))]
+use {io_lifetimes::AsSocketlike, std::net::TcpStream};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
-/// [`TcpStream`] except that it does not have a name or address.
+/// [`UnixStream`] except that it does not have a name or address.
 #[repr(transparent)]
-pub struct SocketpairStream(TcpStream);
+pub struct SocketpairStream(UnixStream);
 
 impl SocketpairStream {
     /// Creates a new independently owned handle to the underlying socket.
@@ -26,7 +28,17 @@ impl SocketpairStream {
     /// returns the number of bytes peeked.
     #[inline]
     pub fn peek(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.0.peek(buf)
+        #[cfg(unix_socket_peek)]
+        {
+            self.0.peek(buf)
+        }
+
+        #[cfg(not(unix_socket_peek))]
+        {
+            // In Unix we know that `TcpStream` and `UnixStream` ultimately
+            // use the same system call here, so we can use `TcpStream`.
+            self.0.as_socketlike_view::<TcpStream>().peek(buf)
+        }
     }
 
     /// Return the number of bytes which are ready to be read immediately.
@@ -39,18 +51,30 @@ impl SocketpairStream {
 /// Create a socketpair and return stream handles connected to each end.
 #[inline]
 pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
+    // Darwin lacks `SOCK_CLOEXEC`.
+    #[cfg(not(any(target_os = "ios", target_os = "macos")))]
+    let socketflags = SocketFlags::CLOEXEC;
+    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    let socketflags = SocketFlags::empty();
+
     let (a, b) = rustix::net::socketpair(
         AddressFamily::UNIX,
         SocketType::STREAM,
-        SocketFlags::CLOEXEC,
+        socketflags,
         Protocol::default(),
     )?;
-    unsafe {
-        Ok((
-            SocketpairStream::from_raw_fd(a.into_raw_fd()),
-            SocketpairStream::from_raw_fd(b.into_raw_fd()),
-        ))
+
+    // Darwin lacks `SOCK_CLOEXEC`.
+    #[cfg(any(target_os = "ios", target_os = "macos"))]
+    {
+        rustix::io::ioctl_fioclex(&a)?;
+        rustix::io::ioctl_fioclex(&b)?;
     }
+
+    Ok((
+        SocketpairStream::from_fd(a.into()),
+        SocketpairStream::from_fd(b.into()),
+    ))
 }
 
 /// Create a socketpair and return seqpacket handles connected to each end.
@@ -66,12 +90,10 @@ pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)
         SocketFlags::CLOEXEC,
         Protocol::default(),
     )?;
-    unsafe {
-        Ok((
-            SocketpairStream::from_raw_fd(a.into_raw_fd()),
-            SocketpairStream::from_raw_fd(b.into_raw_fd()),
-        ))
-    }
+    Ok((
+        SocketpairStream::from_fd(a.into()),
+        SocketpairStream::from_fd(b.into()),
+    ))
 }
 
 impl Read for SocketpairStream {
@@ -177,14 +199,14 @@ impl IntoFd for SocketpairStream {
 impl FromRawFd for SocketpairStream {
     #[inline]
     unsafe fn from_raw_fd(raw_fd: RawFd) -> Self {
-        Self(TcpStream::from_raw_fd(raw_fd))
+        Self(UnixStream::from_raw_fd(raw_fd))
     }
 }
 
 impl FromFd for SocketpairStream {
     #[inline]
     fn from_fd(fd: OwnedFd) -> Self {
-        Self(TcpStream::from_fd(fd))
+        Self(UnixStream::from_fd(fd))
     }
 }
 
