@@ -17,7 +17,7 @@ io-extras = "0.12.0"
 io-lifetimes = { version = "0.4.0", default-features = false }
 
 [target.'cfg(not(windows))'.dependencies]
-rustix = "0.31.0"
+rustix = "0.32.0"
 
 [target.'cfg(windows)'.dependencies]
 uuid = { version = "0.8.1", features = ["v4"] }
