@@ -38,7 +38,7 @@ impl TokioSocketpairStream {
     /// Receives data on the socket from the remote address to which it is
     /// connected, without removing that data from the queue. On success,
     /// returns the number of bytes peeked.
-    pub fn peek(&mut self, _buf: &mut [u8]) -> io::Result<usize> {
+    pub fn peek(&self, _buf: &mut [u8]) -> io::Result<usize> {
         // TODO: Implement async peek on Windows
         Ok(0)
     }

@@ -27,7 +27,7 @@ impl SocketpairStream {
     /// connected, without removing that data from the queue. On success,
     /// returns the number of bytes peeked.
     #[inline]
-    pub fn peek(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+    pub fn peek(&self, buf: &mut [u8]) -> io::Result<usize> {
         #[cfg(unix_socket_peek)]
         {
             self.0.peek(buf)

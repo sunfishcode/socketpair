@@ -45,7 +45,7 @@ impl SocketpairStream {
     /// Receives data on the socket from the remote address to which it is
     /// connected, without removing that data from the queue. On success,
     /// returns the number of bytes peeked.
-    pub fn peek(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+    pub fn peek(&self, buf: &mut [u8]) -> io::Result<usize> {
         let mut bytes_read = MaybeUninit::<u32>::uninit();
         let len = min(buf.len(), u32::MAX as usize) as u32;
         let res = unsafe {
