@@ -31,4 +31,7 @@ let n = b.read(&mut buf)?;
 assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "hello world\n");
 ```
 
+Support for async-std and tokio is temporarily disabled until those crates
+contain the needed implementations of the I/O safety traits.
+
 [`socketpair`]: https://man7.org/linux/man-pages/man2/socketpair.2.html
