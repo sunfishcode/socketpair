@@ -3,7 +3,7 @@
 use io_extras::os::rustix::{
     AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
 };
-use io_lifetimes::{AsFd, BorrowedFd, FromFd, IntoFd, OwnedFd};
+use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
 use rustix::net::{AddressFamily, Protocol, SocketFlags, SocketType};
 use std::fmt::{self, Arguments, Debug};
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
@@ -72,8 +72,8 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
     }
 
     Ok((
-        SocketpairStream::from_fd(a.into()),
-        SocketpairStream::from_fd(b.into()),
+        SocketpairStream::from(OwnedFd::from(a)),
+        SocketpairStream::from(OwnedFd::from(b)),
     ))
 }
 
@@ -91,8 +91,8 @@ pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)
         Protocol::default(),
     )?;
     Ok((
-        SocketpairStream::from_fd(a.into()),
-        SocketpairStream::from_fd(b.into()),
+        SocketpairStream::from(OwnedFd::from(a)),
+        SocketpairStream::from(OwnedFd::from(b)),
     ))
 }
 
@@ -189,10 +189,10 @@ impl IntoRawFd for SocketpairStream {
     }
 }
 
-impl IntoFd for SocketpairStream {
+impl From<SocketpairStream> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.0.into_fd()
+    fn from(stream: SocketpairStream) -> OwnedFd {
+        stream.0.into()
     }
 }
 
@@ -203,10 +203,10 @@ impl FromRawFd for SocketpairStream {
     }
 }
 
-impl FromFd for SocketpairStream {
+impl From<OwnedFd> for SocketpairStream {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self(UnixStream::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self(UnixStream::from(fd))
     }
 }
 

@@ -113,10 +113,10 @@ impl IntoRawFd for AsyncStdSocketpairStream {
     }
 }
 
-impl IntoFd for AsyncStdSocketpairStream {
+impl From<AsyncStdSocketpairStream> for OwnedFd {
     #[inline]
-    fn into_fd(self) -> OwnedFd {
-        self.0.into_fd()
+    fn from(stream: AsyncStdSocketpairStream) -> OwnedFd {
+        stream.0.into()
     }
 }
 
@@ -127,10 +127,10 @@ impl FromRawFd for AsyncStdSocketpairStream {
     }
 }
 
-impl FromFd for AsyncStdSocketpairStream {
+impl From<OwnedFd> for AsyncStdSocketpairStream {
     #[inline]
-    fn from_fd(fd: OwnedFd) -> Self {
-        Self(UnixStream::from_fd(fd))
+    fn from(fd: OwnedFd) -> Self {
+        Self(UnixStream::from(fd))
     }
 }
 
