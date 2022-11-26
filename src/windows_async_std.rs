@@ -6,10 +6,10 @@ use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawH
 use async_std::path::Path;
 use io_extras::os::windows::{
     AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
-    BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
+    BorrowedHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
     RawHandleOrSocket,
 };
-use io_lifetimes::{AsHandle, BorrowedHandle, IntoHandle, OwnedHandle};
+use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::convert::TryInto;
 use std::fmt::{self, Debug};
 use std::os::windows::ffi::OsStrExt;
@@ -172,10 +172,10 @@ impl IntoRawHandle for AsyncStdSocketpairStream {
     }
 }
 
-impl IntoHandle for AsyncStdSocketpairStream {
+impl From<AsyncStdSocketpairStream> for OwnedHandle {
     #[inline]
-    fn into_handle(self) -> OwnedHandle {
-        self.0.into_handle()
+    fn from(stream: AsyncStdSocketpairStream) -> Self {
+        stream.0.into()
     }
 }
 
@@ -207,10 +207,10 @@ impl IntoRawHandleOrSocket for AsyncStdSocketpairStream {
     }
 }
 
-impl IntoHandleOrSocket for AsyncStdSocketpairStream {
+impl From<AsyncStdSocketpairStream> for OwnedHandleOrSocket {
     #[inline]
-    fn into_handle_or_socket(self) -> OwnedHandleOrSocket {
-        self.0.into_handle_or_socket()
+    fn from(stream: AsyncStdSocketpairStream) -> Self {
+        stream.0.into()
     }
 }
 
