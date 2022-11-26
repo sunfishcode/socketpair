@@ -2,8 +2,7 @@
 
 use io_extras::os::windows::{
     AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
-    BorrowedHandleOrSocket, IntoHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
-    RawHandleOrSocket,
+    BorrowedHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket, RawHandleOrSocket,
 };
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::cmp::min;
@@ -304,10 +303,10 @@ impl IntoRawHandleOrSocket for SocketpairStream {
     }
 }
 
-impl IntoHandleOrSocket for SocketpairStream {
+impl From<SocketpairStream> for OwnedHandleOrSocket {
     #[inline]
-    fn into_handle_or_socket(self) -> OwnedHandleOrSocket {
-        self.0.into_handle_or_socket()
+    fn from(stream: SocketpairStream) -> Self {
+        stream.0.into()
     }
 }
 
