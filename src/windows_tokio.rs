@@ -17,15 +17,9 @@ use std::task::{Context, Poll};
 use tokio::fs::File;
 use tokio::io::{self, AsyncRead, AsyncWrite, ReadBuf};
 use uuid::Uuid;
-use winapi::shared::winerror::ERROR_ACCESS_DENIED;
-use winapi::um::fileapi::{CreateFileW, OPEN_EXISTING};
-use winapi::um::handleapi::INVALID_HANDLE_VALUE;
-use winapi::um::namedpipeapi::CreateNamedPipeW;
-use winapi::um::winbase::{
-    FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE,
-    PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_UNLIMITED_INSTANCES,
-};
-use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE};
+use windows_sys::Win32::Storage::FileSystem::{PIPE_ACCESS_DUPLEX, FILE_FLAG_FIRST_PIPE_INSTANCE, FILE_ATTRIBUTE_NORMAL, OPEN_EXISTING};
+use windows_sys::Win32::Foundation::{INVALID_HANDLE_VALUE, ERROR_ACCESS_DENIED};
+use windows_sys::Win32::System::Pipes::{PIPE_UNLIMITED_INSTANCES, PIPE_REJECT_REMOTE_CLIENTS};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.

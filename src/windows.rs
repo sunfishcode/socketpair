@@ -7,6 +7,7 @@ use io_extras::os::windows::{
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::cmp::min;
 use std::convert::TryInto;
+use std::ffi::c_void;
 use std::fmt::{self, Arguments, Debug};
 use std::fs::File;
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
@@ -16,16 +17,16 @@ use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle}
 use std::path::Path;
 use std::ptr;
 use uuid::Uuid;
-use winapi::shared::minwindef::LPVOID;
-use winapi::shared::winerror::ERROR_ACCESS_DENIED;
-use winapi::um::fileapi::{CreateFileW, OPEN_EXISTING};
-use winapi::um::handleapi::INVALID_HANDLE_VALUE;
-use winapi::um::namedpipeapi::{CreateNamedPipeW, PeekNamedPipe};
-use winapi::um::winbase::{
-    FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_ACCESS_DUPLEX, PIPE_READMODE_BYTE, PIPE_READMODE_MESSAGE,
+use windows_sys::Win32::Foundation::{ERROR_ACCESS_DENIED, HANDLE, INVALID_HANDLE_VALUE};
+use windows_sys::Win32::Storage::FileSystem::{
+    CreateFileW, FILE_ATTRIBUTE_NORMAL, FILE_FLAG_FIRST_PIPE_INSTANCE, OPEN_EXISTING,
+    PIPE_ACCESS_DUPLEX,
+};
+use windows_sys::Win32::System::Pipes::{
+    CreateNamedPipeW, PeekNamedPipe, PIPE_READMODE_BYTE, PIPE_READMODE_MESSAGE,
     PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_TYPE_MESSAGE, PIPE_UNLIMITED_INSTANCES,
 };
-use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE};
+use windows_sys::Win32::System::SystemServices::{GENERIC_READ, GENERIC_WRITE};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
@@ -49,8 +50,8 @@ impl SocketpairStream {
         let len = min(buf.len(), u32::MAX as usize) as u32;
         let res = unsafe {
             PeekNamedPipe(
-                self.0.as_raw_handle(),
-                buf.as_mut_ptr() as LPVOID,
+                self.0.as_raw_handle() as HANDLE,
+                buf.as_mut_ptr() as *mut c_void,
                 len,
                 bytes_read.as_mut_ptr(),
                 ptr::null_mut(),
@@ -68,7 +69,7 @@ impl SocketpairStream {
         let mut bytes_avail = MaybeUninit::<u32>::uninit();
         let res = unsafe {
             PeekNamedPipe(
-                self.0.as_raw_handle(),
+                self.0.as_raw_handle() as HANDLE,
                 ptr::null_mut(),
                 0,
                 ptr::null_mut(),
@@ -112,7 +113,7 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
             return Err(err);
         }
     };
-    let first = unsafe { SocketpairStream::from_raw_handle(first_raw_handle) };
+    let first = unsafe { SocketpairStream::from_raw_handle(first_raw_handle as _) };
 
     let second = open_second_handle(path)?;
 
@@ -148,7 +149,7 @@ pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)
             return Err(err);
         }
     };
-    let first = unsafe { SocketpairStream::from_raw_handle(first_raw_handle) };
+    let first = unsafe { SocketpairStream::from_raw_handle(first_raw_handle as _) };
 
     let second = open_second_handle(path)?;
 
@@ -164,13 +165,13 @@ fn open_second_handle(path: Vec<u16>) -> io::Result<SocketpairStream> {
             ptr::null_mut(),
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
-            ptr::null_mut(),
+            0,
         )
     };
     if second_raw_handle == INVALID_HANDLE_VALUE {
         return Err(io::Error::last_os_error());
     }
-    let second = unsafe { SocketpairStream::from_raw_handle(second_raw_handle) };
+    let second = unsafe { SocketpairStream::from_raw_handle(second_raw_handle as _) };
 
     Ok(second)
 }

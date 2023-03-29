@@ -21,12 +21,22 @@ rustix = { version = "0.37.0", features = ["net"] }
 
 [target.'cfg(windows)'.dependencies]
 uuid = { version = "1.0.0", features = ["v4"] }
-winapi = { version = "0.3.9", features = ["handleapi", "namedpipeapi", "std", "winerror"] }
+
+[target.'cfg(windows)'.dependencies.windows-sys]
+version = "0.45.0"
+features = [
+    "Win32_Foundation",
+    "Win32_Networking_WinSock",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Pipes",
+    "Win32_System_SystemServices",
+]
 
 [dev-dependencies]
 anyhow = "1.0.38"
 
 [features]
 default = []
-use_async_std = ["async-std", "io-extras/async-std", "io-lifetimes/async-std"]
+use_async_std = ["async-std", "io-extras/async-std"]
 use_tokio = ["tokio", "io-extras/tokio", "io-lifetimes/tokio"]
