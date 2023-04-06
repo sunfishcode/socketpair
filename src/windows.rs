@@ -17,7 +17,9 @@ use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawHandle}
 use std::path::Path;
 use std::ptr;
 use uuid::Uuid;
-use windows_sys::Win32::Foundation::{ERROR_ACCESS_DENIED, HANDLE, INVALID_HANDLE_VALUE};
+use windows_sys::Win32::Foundation::{
+    ERROR_ACCESS_DENIED, GENERIC_READ, GENERIC_WRITE, HANDLE, INVALID_HANDLE_VALUE,
+};
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, FILE_ATTRIBUTE_NORMAL, FILE_FLAG_FIRST_PIPE_INSTANCE, OPEN_EXISTING,
     PIPE_ACCESS_DUPLEX,
@@ -26,7 +28,6 @@ use windows_sys::Win32::System::Pipes::{
     CreateNamedPipeW, PeekNamedPipe, PIPE_READMODE_BYTE, PIPE_READMODE_MESSAGE,
     PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_BYTE, PIPE_TYPE_MESSAGE, PIPE_UNLIMITED_INSTANCES,
 };
-use windows_sys::Win32::System::SystemServices::{GENERIC_READ, GENERIC_WRITE};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
