@@ -4,7 +4,7 @@ use io_extras::os::rustix::{
     AsRawFd, AsRawReadWriteFd, AsReadWriteFd, FromRawFd, IntoRawFd, RawFd,
 };
 use io_lifetimes::{AsFd, BorrowedFd, OwnedFd};
-use rustix::net::{AddressFamily, Protocol, SocketFlags, SocketType};
+use rustix::net::{AddressFamily, SocketFlags, SocketType};
 use std::fmt::{self, Arguments, Debug};
 use std::io::{self, IoSlice, IoSliceMut, Read, Write};
 use std::os::unix::net::UnixStream;
@@ -57,12 +57,8 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
     #[cfg(any(target_os = "ios", target_os = "macos"))]
     let socketflags = SocketFlags::empty();
 
-    let (a, b) = rustix::net::socketpair(
-        AddressFamily::UNIX,
-        SocketType::STREAM,
-        socketflags,
-        Protocol::default(),
-    )?;
+    let (a, b) =
+        rustix::net::socketpair(AddressFamily::UNIX, SocketType::STREAM, socketflags, None)?;
 
     // Darwin lacks `SOCK_CLOEXEC`.
     #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -88,7 +84,7 @@ pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)
         AddressFamily::UNIX,
         SocketType::SEQPACKET,
         SocketFlags::CLOEXEC,
-        Protocol::default(),
+        None,
     )?;
     Ok((
         SocketpairStream::from(OwnedFd::from(a)),
