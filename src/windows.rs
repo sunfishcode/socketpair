@@ -6,7 +6,6 @@ use io_extras::os::windows::{
 };
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::cmp::min;
-use std::convert::TryInto;
 use std::ffi::c_void;
 use std::fmt::{self, Arguments, Debug};
 use std::fs::File;

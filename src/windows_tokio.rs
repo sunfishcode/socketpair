@@ -5,7 +5,6 @@ use io_extras::os::windows::{
     BorrowedHandleOrSocket, RawHandleOrSocket,
 };
 use io_lifetimes::{AsHandle, BorrowedHandle};
-use std::convert::TryInto;
 use std::fmt::{self, Debug};
 use std::io::IoSlice;
 use std::os::windows::ffi::OsStrExt;

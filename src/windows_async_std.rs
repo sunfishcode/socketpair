@@ -10,7 +10,6 @@ use io_extras::os::windows::{
     RawHandleOrSocket,
 };
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
-use std::convert::TryInto;
 use std::fmt::{self, Debug};
 use std::os::windows::ffi::OsStrExt;
 use std::pin::Pin;
