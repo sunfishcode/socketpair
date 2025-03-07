@@ -1,6 +1,6 @@
 [package]
 name = "socketpair"
-version = "0.19.5"
+version = "0.19.6"
 description = "Cross-platform socketpair functionality"
 authors = ["Dan Gohman <dev@sunfishcode.online>"]
 edition = "2021"
