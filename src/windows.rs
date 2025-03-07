@@ -165,7 +165,7 @@ fn open_second_handle(path: Vec<u16>) -> io::Result<SocketpairStream> {
             ptr::null_mut(),
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
-            0,
+            ptr::null_mut(),
         )
     };
     if second_raw_handle == INVALID_HANDLE_VALUE {
