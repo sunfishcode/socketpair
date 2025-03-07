@@ -6,8 +6,7 @@ use async_std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, RawH
 use async_std::path::Path;
 use io_extras::os::windows::{
     AsHandleOrSocket, AsRawHandleOrSocket, AsRawReadWriteHandleOrSocket, AsReadWriteHandleOrSocket,
-    BorrowedHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket,
-    RawHandleOrSocket,
+    BorrowedHandleOrSocket, IntoRawHandleOrSocket, OwnedHandleOrSocket, RawHandleOrSocket,
 };
 use io_lifetimes::{AsHandle, BorrowedHandle, OwnedHandle};
 use std::fmt::{self, Debug};
@@ -16,9 +15,11 @@ use std::pin::Pin;
 use std::ptr;
 use std::task::{Context, Poll};
 use uuid::Uuid;
-use windows_sys::Win32::Storage::FileSystem::{PIPE_ACCESS_DUPLEX, FILE_FLAG_FIRST_PIPE_INSTANCE, FILE_ATTRIBUTE_NORMAL, OPEN_EXISTING};
-use windows_sys::Win32::Foundation::{INVALID_HANDLE_VALUE, ERROR_ACCESS_DENIED};
-use windows_sys::Win32::System::Pipes::{PIPE_UNLIMITED_INSTANCES, PIPE_REJECT_REMOTE_CLIENTS};
+use windows_sys::Win32::Foundation::{ERROR_ACCESS_DENIED, INVALID_HANDLE_VALUE};
+use windows_sys::Win32::Storage::FileSystem::{
+    FILE_ATTRIBUTE_NORMAL, FILE_FLAG_FIRST_PIPE_INSTANCE, OPEN_EXISTING, PIPE_ACCESS_DUPLEX,
+};
+use windows_sys::Win32::System::Pipes::{PIPE_REJECT_REMOTE_CLIENTS, PIPE_UNLIMITED_INSTANCES};
 
 /// A socketpair stream, which is a bidirectional bytestream much like a
 /// [`TcpStream`] except that it does not have a name or address.
