@@ -74,9 +74,6 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
 }
 
 /// Create a socketpair and return seqpacket handles connected to each end.
-///
-/// Note that this is not available on macOS or ios due to missing OS support
-/// for `SOCK_SEQPACKET` with `AF_UNIX`.
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 #[inline]
 pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
@@ -89,6 +86,31 @@ pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)
     Ok((
         SocketpairStream::from(OwnedFd::from(a)),
         SocketpairStream::from(OwnedFd::from(b)),
+    ))
+}
+
+/// Create a socketpair and return seqpacket handles connected to each end.
+#[cfg(any(target_os = "ios", target_os = "macos"))]
+#[inline]
+pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
+    // Darwin doesn't support `SEQPACKET` on `UNIX`-domain sockets, so we use
+    // `DGRAM` instead, which also provides packet-boundary semantics. `DGRAM`
+    // isn't reliable in general, but is commonly understood to be reliable
+    // in the `UNIX` domain.
+    //
+    // And, Darwin doesn't have `SOCK_CLOEXEC`. So we call `ioctl_fioclex`
+    // to emulate it.
+    let (a, b) = rustix::net::socketpair(
+        AddressFamily::UNIX,
+        SocketType::DGRAM,
+        SocketFlags::empty(),
+        Protocol::default(),
+    )?;
+    rustix::io::ioctl_fioclex(&a)?;
+    rustix::io::ioctl_fioclex(&b)?;
+    Ok((
+        SocketpairStream::from_fd(a.into()),
+        SocketpairStream::from_fd(b.into()),
     ))
 }
 
