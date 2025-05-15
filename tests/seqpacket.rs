@@ -2,6 +2,7 @@
 
 use socketpair::socketpair_seqpacket;
 use std::io::{self, Read, Write};
+use std::str::FromStr;
 use std::sync::{Arc, Condvar, Mutex};
 use std::{str, thread};
 
@@ -89,8 +90,8 @@ fn peek() -> anyhow::Result<()> {
 }
 
 /// Like `try_clone` in the stream tests, but this doesn't work with seqpacket
-/// because one write is paired with two reads. We get an unexpected EOF trying to
-/// read to the end.
+/// because one write is paired with two reads. We get an unexpected EOF trying
+/// to read to the end.
 #[test]
 fn try_clone() -> anyhow::Result<()> {
     let (mut a, mut b) = socketpair_seqpacket()?;
@@ -128,5 +129,64 @@ fn try_clone_two_writes() -> anyhow::Result<()> {
     c.read_exact(&mut buf)?;
     assert_eq!(str::from_utf8(&buf).unwrap(), "world\n");
 
+    Ok(())
+}
+
+/// `socketpair_seqpacket` should be reliable. Do a simple test to catch
+/// obvious unreliability.
+#[test]
+fn test_reliable() -> anyhow::Result<()> {
+    let (mut a, mut c) = socketpair_seqpacket()?;
+    let mut b = a.try_clone()?;
+
+    // Write a bunch of messages from multiple threads, to see if they'll
+    // interfere with each other.
+    let thread_a = thread::spawn(move || -> anyhow::Result<()> {
+        for i in 0..0x8000 {
+            write!(a, "{}", format!("thread A: {}", i))?;
+        }
+        Ok(())
+    });
+    let thread_b = thread::spawn(move || -> anyhow::Result<()> {
+        for i in 0..0x8000 {
+            write!(b, "{}", format!("thread B: {}", i))?;
+        }
+        Ok(())
+    });
+
+    // Give the threads some time to fill up the socket buffers, to see
+    // if they'll start dropping packets.
+    std::thread::sleep(std::time::Duration::from_secs(5));
+
+    // Read the packets, and assert they arrive in the right order.
+    let thread_c = thread::spawn(move || -> anyhow::Result<()> {
+        let mut buf = [0_u8; 4096];
+
+        let mut expect_a = 0;
+        let mut expect_b = 0;
+        for _ in 0..0x10000 {
+            let n = c.read(&mut buf)?;
+            let s = str::from_utf8(&buf[..n]).unwrap();
+            dbg!(s);
+            if let Some(x) = s.strip_prefix("thread A: ") {
+                dbg!(x);
+                let new_a = u32::from_str(x).unwrap();
+                assert_eq!(new_a, expect_a);
+                expect_a = new_a + 1;
+            } else if let Some(x) = s.strip_prefix("thread B: ") {
+                dbg!(x);
+                let new_b = u32::from_str(x).unwrap();
+                assert_eq!(new_b, expect_b);
+                expect_b = new_b + 1;
+            } else {
+                unreachable!("unexpected message");
+            }
+        }
+        Ok(())
+    });
+
+    thread_c.join().unwrap()?;
+    thread_a.join().unwrap()?;
+    thread_b.join().unwrap()?;
     Ok(())
 }
