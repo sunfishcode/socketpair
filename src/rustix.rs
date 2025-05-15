@@ -104,13 +104,13 @@ pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)
         AddressFamily::UNIX,
         SocketType::DGRAM,
         SocketFlags::empty(),
-        Protocol::default(),
+        None,
     )?;
     rustix::io::ioctl_fioclex(&a)?;
     rustix::io::ioctl_fioclex(&b)?;
     Ok((
-        SocketpairStream::from_fd(a.into()),
-        SocketpairStream::from_fd(b.into()),
+        SocketpairStream::from(OwnedFd::from(a)),
+        SocketpairStream::from(OwnedFd::from(b)),
     ))
 }
 
