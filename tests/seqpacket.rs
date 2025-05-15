@@ -134,6 +134,10 @@ fn try_clone_two_writes() -> anyhow::Result<()> {
 
 /// `socketpair_seqpacket` should be reliable. Do a simple test to catch
 /// obvious unreliability.
+///
+/// Disable on Windows because it doesn't guarantee that a single read
+/// reads at most one message.
+#[cfg_attr(windows, ignore)]
 #[test]
 fn test_reliable() -> anyhow::Result<()> {
     let (mut a, mut c) = socketpair_seqpacket()?;

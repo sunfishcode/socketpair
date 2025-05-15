@@ -74,6 +74,10 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
 }
 
 /// Create a socketpair and return seqpacket handles connected to each end.
+///
+/// Seqpacket means that messages will not be split, and reads read at most one
+/// message each. Except on Windows where multiple messages may be read by a
+/// single read.
 #[cfg(not(any(target_os = "ios", target_os = "macos")))]
 #[inline]
 pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
@@ -90,6 +94,10 @@ pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)
 }
 
 /// Create a socketpair and return seqpacket handles connected to each end.
+///
+/// Seqpacket means that messages will not be split, and reads read at most one
+/// message each. Except on Windows where multiple messages may be read by a
+/// single read.
 #[cfg(any(target_os = "ios", target_os = "macos"))]
 #[inline]
 pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {

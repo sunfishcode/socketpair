@@ -121,6 +121,10 @@ pub fn socketpair_stream() -> io::Result<(SocketpairStream, SocketpairStream)> {
 }
 
 /// Create a socketpair and return seqpacket handles connected to each end.
+///
+/// Seqpacket means that messages will not be split, and reads read at most one
+/// message each. Except on Windows where multiple messages may be read by a
+/// single read.
 pub fn socketpair_seqpacket() -> io::Result<(SocketpairStream, SocketpairStream)> {
     let (first_raw_handle, path) = loop {
         let name = format!("\\\\.\\pipe\\{}", Uuid::new_v4());
