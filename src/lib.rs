@@ -29,26 +29,26 @@
 
 #[cfg(not(windows))]
 mod rustix;
-#[cfg(all(unix, feature = "async-std"))]
+#[cfg(all(unix, feature = "use_async_std"))]
 mod unix_async_std;
-#[cfg(all(unix, feature = "tokio"))]
+#[cfg(all(unix, feature = "use_tokio"))]
 mod unix_tokio;
 #[cfg(windows)]
 mod windows;
-#[cfg(all(windows, feature = "async-std"))]
+#[cfg(all(windows, feature = "use_async_std"))]
 mod windows_async_std;
-#[cfg(all(windows, feature = "tokio"))]
+#[cfg(all(windows, feature = "use_tokio"))]
 mod windows_tokio;
 
 #[cfg(unix)]
 pub use crate::rustix::{socketpair_seqpacket, socketpair_stream, SocketpairStream};
-#[cfg(all(unix, feature = "async-std"))]
+#[cfg(all(unix, feature = "use_async_std"))]
 pub use crate::unix_async_std::{async_std_socketpair_stream, AsyncStdSocketpairStream};
-#[cfg(all(unix, feature = "tokio"))]
+#[cfg(all(unix, feature = "use_tokio"))]
 pub use crate::unix_tokio::{tokio_socketpair_stream, TokioSocketpairStream};
 #[cfg(windows)]
 pub use crate::windows::{socketpair_seqpacket, socketpair_stream, SocketpairStream};
-#[cfg(all(windows, feature = "async-std"))]
+#[cfg(all(windows, feature = "use_async_std"))]
 pub use crate::windows_async_std::{async_std_socketpair_stream, AsyncStdSocketpairStream};
-#[cfg(all(windows, feature = "tokio"))]
+#[cfg(all(windows, feature = "use_tokio"))]
 pub use crate::windows_tokio::{tokio_socketpair_stream, TokioSocketpairStream};
